@@ -41,7 +41,7 @@ pub fn run(filename: &str) {
         exit(1);
     }
 
-    let printer_res = printer::print(renderer_res.filename);
+    let printer_res = printer::print("".to_string());
     if !printer_res.success {
         println!("{}", printer_res.exception);
         exit(1);

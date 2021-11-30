@@ -7,7 +7,8 @@ use super::data;
 pub const TK_NULL     : &'static str = "null";
 
 pub const TK_VARIABLE : &'static str = "variable";
-pub const TK_INTEGER  : &'static str = "integer";
+pub const TK_NUMBER   : &'static str = "number";
+pub const TK_STRING   : &'static str = "string";
 
 pub const TK_ADD      : &'static str = "+";
 pub const TK_SUBTRACT : &'static str = "-";

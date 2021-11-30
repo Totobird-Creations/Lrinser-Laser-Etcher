@@ -9,3 +9,4 @@ edition = "2018"
 [dependencies]
 colored = "2.0.0"
 png     = "0.17.2"
+libmath = "0.1.4"

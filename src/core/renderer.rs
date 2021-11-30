@@ -5,13 +5,13 @@ use super::data;
 use std::path::Path;
 use std::fs::File;
 use std::io::BufWriter;
+use math::round::floor;
 
 
 
 #[derive(Clone, Debug)]
 pub struct RendererResult {
     pub success   : bool,
-    pub filename  : String,
     pub exception : exceptions::RendererException
 }
 
@@ -24,7 +24,7 @@ pub fn render(mut data : interpreter::InterpreterData) -> RendererResult {
         data.resolution.y = data.size.y
     }
 
-    let         path                             = Path::new(r"./export.png");
+    let         path                             = Path::new(&data.export);
     let         file                             = File::create(path).unwrap();
     let ref mut buffer                           = BufWriter::new(file);
 
@@ -43,18 +43,19 @@ pub fn render(mut data : interpreter::InterpreterData) -> RendererResult {
     encoder.set_source_chromaticities(src_chr);
     let mut     writer                           = encoder.write_header().unwrap();
     let mut     image   : Vec<Vec<data::Colour>> = vec![vec![]];
-    for row in 0..data.resolution.y {
+    for pixel_y in 0..data.resolution.y {
         image.push(vec![]);
-        for column in 0..data.resolution.x {
-            if row == column {
-                image[row as usize].push(data::colour(1.0, 0.0, 0.0, 1.0));
-            if row == column - 1 {
-                image[row as usize].push(data::colour(0.0, 1.0, 0.0, 1.0));
-            } else if row % 2 == column % 2 {
-                image[row as usize].push(data::colour(1.0, 1.0, 1.0, 1.0));
+        for pixel_x in 0..data.resolution.x {
+            let x = data.position.x as f32 + (data.size.x as f32 * (pixel_x as f32 / data.resolution.x as f32));
+            let y = data.position.y as f32 + (data.size.y as f32 * (pixel_y as f32 / data.resolution.y as f32));
+
+            //if floor(x as f64, 0) == floor(y as f64, 0) {
+            if x == y {
+                image[y as usize].push(data::colour(1.0, 1.0, 0.0, 1.0));
             } else {
-                image[row as usize].push(data::colour(0.0, 0.0, 0.0, 1.0));
+                image[y as usize].push(data::colour(1.0, 1.0, 1.0, 1.0));
             }
+
         }
     }
 
@@ -70,5 +71,16 @@ pub fn render(mut data : interpreter::InterpreterData) -> RendererResult {
     let         fin_obj                          = &fin_img.as_slice();
     writer.write_image_data(fin_obj).unwrap();
 
-    panic!("SUCCESS: RENDERING FINISHED");
+    return RendererResult {
+        success   : true,
+        exception : exceptions::RendererException {
+            base    : exceptions::RendererExceptionBase::NoException,
+            message : "".to_string(),
+            range   : data::Range {
+                filename : "".to_string(),
+                start    : 0,
+                end      : 0
+            }
+        }
+    };
 }

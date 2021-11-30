@@ -1,8 +1,9 @@
 pub const ALPHABETIC : &'static str      = "abcdefghijklmnopqrstuvwxyz";
 pub const NUMERIC    : &'static str      = "0123456789";
-pub const HEADFUNCS  : [&'static str; 2] = [
+pub const HEADFUNCS  : [&'static str; 3] = [
     "frame",
-    "resolution"
+    "resolution",
+    "export"
 ];
 
 

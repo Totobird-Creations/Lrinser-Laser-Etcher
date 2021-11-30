@@ -1,4 +1,5 @@
 #frame(0, 0, 16, 16)
-#resolution(32, 48)
+#resolution(32, 32)
+#export("target.png")
 
-y = 2x + 4
+y = 0.5x + 10

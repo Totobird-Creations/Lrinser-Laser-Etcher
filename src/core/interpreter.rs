@@ -9,11 +9,14 @@ use super::exceptions;
 pub struct InterpreterData {
     pub set_frame      : bool,
     pub set_resolution : bool,
+    pub set_export     : bool,
 
     pub position       : data::Vector2,
     pub size           : data::Vector2,
 
     pub resolution     : data::Vector2,
+
+    pub export         : String,
 
     pub equations      : Vec<nodes::Node>
 }
@@ -33,19 +36,24 @@ pub fn interpret(nodes : Vec<nodes::Node>) -> InterpreterResult {
     let mut data = InterpreterData {
         set_frame      : false,
         set_resolution : false,
+        set_export     : false,
 
         position       : defaults::POSITION,
         size           : defaults::SIZE,
 
         resolution     : defaults::RESOLUTION,
 
+        export         : defaults::EXPORT.to_string(),
+
         equations      : vec![]
     };
+
     let mut exceptions = vec![];
     for node in nodes {
         let mut result = match node.base {
             nodes::NodeBase::HeaderFuncFrame      {x, y, w, h}  => interpret_headerfunc_frame(data.clone(), node.range, x, y, w, h),
             nodes::NodeBase::HeaderFuncResolution {w, h}        => interpret_headerfunc_resolution(data.clone(), node.range, w, h),
+            nodes::NodeBase::HeaderFuncExport     {filename}    => interpret_headerfunc_export(data.clone(), node.range, filename),
             nodes::NodeBase::EqualsExpression     {left, right} => interpret_equation_equals(data.clone(), node.range, *left, *right),
             _                                                   => {
                 println!("{}", node);
@@ -139,6 +147,31 @@ pub fn interpret_headerfunc_resolution(mut data : InterpreterData, range : data:
         x : w,
         y : h
     };
+
+    return InterpreterResult {
+        success    : true,
+        data       : data,
+        exceptions : vec![]
+    };
+}
+
+
+
+pub fn interpret_headerfunc_export(mut data : InterpreterData, range : data::Range, filename : String) -> InterpreterResult {
+    if data.set_export {
+        return InterpreterResult {
+            success    : false,
+            data       : data,
+            exceptions : vec![exceptions::InterpreterException {
+                base    : exceptions::InterpreterExceptionBase::HeaderAlreadyAccessedException,
+                message : "Header `export` has already been accessed.".to_string(),
+                range   : range
+            }]
+        };
+    }
+
+    data.set_export = true;
+    data.export = filename;
 
     return InterpreterResult {
         success    : true,

@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use super::data;
 use super::tokens;
 use super::exceptions;
@@ -102,9 +104,18 @@ impl Lexer {
 
             else if data::NUMERIC.contains(self.ch) {
                 let mut num   = "".to_string();
+                let mut dots  = 0;
                 let     start = self.pos;
-                while (! self.end) && ((data::NUMERIC.to_string() +  "_").contains(self.ch)) {
-                    if self.ch == '_' {
+                while (! self.end) && ((data::NUMERIC.to_string() + "._").contains(self.ch)) {
+                    if self.ch == '.' {
+                        if dots >= 1 {
+                            break
+                        };
+                        dots += 1;
+                        num += ".";
+                        self.advance();
+                        continue
+                    } else if self.ch == '_' {
                         self.advance();
                         continue;
                     }
@@ -112,10 +123,84 @@ impl Lexer {
                     self.advance();
                 }
                 tokens.push(tokens::Token {
-                    name  : tokens::TK_INTEGER.to_string(),
+                    name  : tokens::TK_NUMBER.to_string(),
                     value : num,
                     range : self.get_range(start)
                 });
+            }
+
+
+            else if self.ch == '"' {
+                let mut string = "".to_string();
+                let     start  = self.pos;
+
+                let mut escchars = HashMap::new();
+                escchars.insert('\\' , "\\");
+                escchars.insert('n'  , "\n");
+                escchars.insert('\n' , "\n");
+                escchars.insert('t'  , "\t");
+                escchars.insert('\'' , "\'");
+                escchars.insert('\"' , "\"");
+                let mut escaped = false;
+
+                self.advance();
+
+                while (! self.end) && (self.ch != '"' || escaped) {
+                    if escaped {
+                        if ! escchars.contains_key(&self.ch) {
+                            return LexerResult {
+                                success   : false,
+                                tokens    : tokens,
+                                exception : exceptions::LexerException {
+                                    base    : exceptions::LexerExceptionBase::EscapeException,
+                                    message : format!("Can not escape charater: `{}`.", data::escapify(self.ch.to_string())),
+                                    range   : self.get_range(self.pos)
+                                }
+                            }
+                        }
+
+                        string += escchars.get(&self.ch).unwrap();
+                        escaped = false;
+
+                    } else {
+                        if self.ch == '\\' {
+                            escaped = true;
+                        } else if self.ch == '\n' {
+                            return LexerResult {
+                                success   : false,
+                                tokens    : tokens,
+                                exception : exceptions::LexerException {
+                                    base    : exceptions::LexerExceptionBase::EndException,
+                                    message : format!("Invalid EOL."),
+                                    range   : self.get_range(self.pos)
+                                }
+                            };
+                        } else {
+                            string += self.ch.to_string().as_str();
+                        }
+                    }
+                    self.advance();
+                }
+
+                if self.end {
+                    return LexerResult {
+                        success   : false,
+                        tokens    : tokens,
+                        exception : exceptions::LexerException {
+                            base    : exceptions::LexerExceptionBase::EndException,
+                            message : format!("Invalid EOF."),
+                            range   : self.get_range(self.pos)
+                        }
+                    };
+                }
+
+                tokens.push(tokens::Token {
+                    name  : tokens::TK_STRING.to_string(),
+                    value : string,
+                    range : self.get_range(start)
+                });
+
+                self.advance();
             }
 
 

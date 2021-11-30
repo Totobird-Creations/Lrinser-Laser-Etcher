@@ -16,6 +16,8 @@ impl fmt::Display for LexerException {
         let base_as_string : String;
         base_as_string = match &self.base {
             LexerExceptionBase::IllegalCharacterException => "IllegalCharacterException",
+            LexerExceptionBase::EscapeException           => "EscapeException",
+            LexerExceptionBase::EndException              => "EndException",
             LexerExceptionBase::NoException               => "NoException"
         }.to_string();
 
@@ -29,7 +31,9 @@ impl fmt::Display for LexerException {
 pub enum LexerExceptionBase {
     NoException,
 
-    IllegalCharacterException
+    IllegalCharacterException,
+    EscapeException,
+    EndException
 }
 
 
@@ -76,8 +80,7 @@ impl fmt::Display for InterpreterException {
         let base_as_string : String;
         base_as_string = match &self.base {
             InterpreterExceptionBase::InvalidValueException          => "InvalidValueException",
-            InterpreterExceptionBase::HeaderAlreadyAccessedException => "HeaderAlreadyAccessedException",
-            InterpreterExceptionBase::NoException                    => "NoException"
+            InterpreterExceptionBase::HeaderAlreadyAccessedException => "HeaderAlreadyAccessedException"
         }.to_string();
 
         let mut exc = "".to_string();
@@ -88,7 +91,6 @@ impl fmt::Display for InterpreterException {
 }
 #[derive(Clone, Debug)]
 pub enum InterpreterExceptionBase {
-    NoException,
     InvalidValueException,
     HeaderAlreadyAccessedException
 }

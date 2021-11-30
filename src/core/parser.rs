@@ -154,6 +154,7 @@ impl Parser {
 
             "frame"      => self.header_frame(),
             "resolution" => self.header_resolution(),
+            "export"     => self.header_export(),
 
             _       => panic!("Unknown header function: `{}`", func)
 
@@ -218,6 +219,34 @@ impl Parser {
 
 
 
+    fn header_export(&mut self) -> ParserResult {
+        let range = self.token.range.clone();
+        if self.token.name != tokens::TK_STRING {
+            return self.failure(
+                exceptions::ParserException {
+                    base    : exceptions::ParserExceptionBase::MissingTokenException,
+                    message : "Expected (String) not found.".to_string(),
+                    range   : self.token.range.clone()
+                }
+            );
+        }
+        let filename = self.token.value.clone();
+        self.advance();
+
+        return self.success(vec![nodes::Node {
+            base : nodes::NodeBase::HeaderFuncExport {
+                filename : filename
+            },
+            range : data::Range {
+                filename : range.filename,
+                start    : range.start,
+                end      : self.token.range.end
+            }
+        }]);
+    }
+
+
+
     fn header_get_args(&mut self, arg_count : usize) -> HeaderArgsResult {
         let mut args  : Vec<i32> = vec![];
         for i in 0..arg_count {
@@ -226,7 +255,7 @@ impl Parser {
                 multiplier = -1;
                 self.advance();
             }
-            if self.token.name != tokens::TK_INTEGER {
+            if self.token.name != tokens::TK_NUMBER {
                 return HeaderArgsResult {
                     success   : false,
                     args      : vec![],
@@ -420,7 +449,7 @@ impl Parser {
             node = res.nodes[0].clone();
         }
 
-        else if token.name == tokens::TK_INTEGER {
+        else if token.name == tokens::TK_NUMBER {
             self.advance();
             node = nodes::Node {
                 base : nodes::NodeBase::Number {

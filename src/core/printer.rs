@@ -1,4 +1,5 @@
 use super::exceptions;
+use super::data;
 
 
 
@@ -10,6 +11,17 @@ pub struct PrinterResult {
 
 
 
-pub fn print(filename : String) -> PrinterResult {
-    panic!("printed");
+pub fn print(_filename : String) -> PrinterResult {
+    return PrinterResult {
+        success   : false,
+        exception : exceptions::PrinterException {
+            base    : exceptions::PrinterExceptionBase::NoException,
+            message : "Printing Reached".to_string(),
+            range   : data::Range {
+                filename : "<PANIC>".to_string(),
+                start    : 0,
+                end      : 0
+            }
+        }
+    };
 }

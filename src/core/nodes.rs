@@ -21,7 +21,7 @@ pub enum NodeBase {
     },
 
     Number {
-        value : i32
+        value : f32
     },
     Variable {
         name  : String
@@ -53,6 +53,9 @@ pub enum NodeBase {
     HeaderFuncResolution {
         w : i32,
         h : i32
+    },
+    HeaderFuncExport {
+        filename : String
     }
 
 
@@ -69,7 +72,8 @@ impl fmt::Display for Node {
             NodeBase::MultiplicationOperation {left, right} => write!(f, "({} * {})", left, right),
             NodeBase::DivisionOperation       {left, right} => write!(f, "({} / {})", left, right),
             NodeBase::HeaderFuncFrame         {x, y, w, h}  => write!(f, "#frame({}, {}, {}, {})", x, y, w, h),
-            NodeBase::HeaderFuncResolution    {w, h}        => write!(f, "#resolution({}, {})", w, h)
+            NodeBase::HeaderFuncResolution    {w, h}        => write!(f, "#resolution({}, {})", w, h),
+            NodeBase::HeaderFuncExport        {filename}    => write!(f, "#export(`{}`)", data::escapify(filename.clone()))
         }
     }
 }
