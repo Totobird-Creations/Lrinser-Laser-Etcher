@@ -5,7 +5,7 @@ use super::data;
 use std::path::Path;
 use std::fs::File;
 use std::io::BufWriter;
-use math::round::floor;
+//use math::round::floor;
 
 
 
@@ -46,14 +46,16 @@ pub fn render(mut data : interpreter::InterpreterData) -> RendererResult {
     for pixel_y in 0..data.resolution.y {
         image.push(vec![]);
         for pixel_x in 0..data.resolution.x {
-            let x = data.position.x as f32 + (data.size.x as f32 * (pixel_x as f32 / data.resolution.x as f32));
-            let y = data.position.y as f32 + (data.size.y as f32 * (pixel_y as f32 / data.resolution.y as f32));
+            let x1 = data.position.x as f32 + (data.size.x as f32 * (pixel_x as f32 / data.resolution.x as f32));
+            let x2 = data.position.x as f32 + (data.size.x as f32 * ((pixel_x as f32 + 1.0) / data.resolution.x as f32));
+            let y1 = data.position.y as f32 + (data.size.y as f32 * (pixel_y as f32 / data.resolution.y as f32));
+            let y2 = data.position.y as f32 + (data.size.y as f32 * ((pixel_y as f32 + 1.0) / data.resolution.y as f32));
 
             //if floor(x as f64, 0) == floor(y as f64, 0) {
-            if x == y {
-                image[y as usize].push(data::colour(1.0, 1.0, 0.0, 1.0));
+            if (x1 > y1 && x2 < y2) || (x2 > y1 && x1 < y2) {
+                image[pixel_y as usize].push(data::colour(1.0, 0.0, 0.0, 1.0));
             } else {
-                image[y as usize].push(data::colour(1.0, 1.0, 1.0, 1.0));
+                image[pixel_y as usize].push(data::colour(1.0, 1.0, 1.0, 1.0));
             }
 
         }

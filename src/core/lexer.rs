@@ -62,8 +62,8 @@ impl Lexer {
                 self.advance();
             }
 
-
-            else if self.ch == '\n' {
+            
+            else if ['\n', '\r'].contains(&self.ch) {
                 tokens.push(tokens::Token {
                     name  : tokens::TK_EOL.to_string(),
                     value : "".to_string(),

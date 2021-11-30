@@ -10,7 +10,7 @@ Tokens:
 - HEADFUNC:
     - `[a-zA-Z]+`
 - NUMBER:
-    - `[0-9]+`
+    - `[0-9]+(\.[0-9]*)?`
 - ADD:
     - `\+`
 - SUBTRACT:
