@@ -2,6 +2,16 @@ use std::fmt;
 use std::ops;
 
 use super::data;
+use super::exceptions;
+
+
+
+#[derive(Clone, Debug)]
+pub struct EvaluationResult {
+    pub success   : bool,
+    pub value     : f32,
+    pub exception : exceptions::RendererException
+}
 
 
 
@@ -60,6 +70,136 @@ pub enum NodeBase {
 
 
 
+}
+impl Node {
+    fn evaluate(&self) -> EvaluationResult {
+        return match &self.base {
+
+            NodeBase::Number            {value}       => EvaluationResult {
+                success   : true,
+                value     : *value,
+                exception : exceptions::RendererException {
+                    base    : exceptions::RendererExceptionBase::NoException,
+                    message : "".to_string(),
+                    range   : self.range.clone()
+                }
+            },
+
+            NodeBase::AdditionOperation {left, right} => {
+                let left_res  = left.evaluate();
+                if ! left_res.success {
+                    return left_res;
+                }
+                let right_res = right.evaluate();
+                if ! right_res.success {
+                    return right_res;
+                }
+                return EvaluationResult {
+                    success   : true,
+                    value     : left_res.value + right_res.value,
+                    exception : exceptions::RendererException {
+                        base    : exceptions::RendererExceptionBase::NoException,
+                        message : "".to_string(),
+                        range   : data::Range {
+                            start    : left_res.exception.range.start,
+                            end      : right_res.exception.range.end,
+                            filename : left_res.exception.range.filename
+                        }
+                    }
+                };
+            },
+
+            NodeBase::SubtractionOperation {left, right} => {
+                let left_res  = left.evaluate();
+                if ! left_res.success {
+                    return left_res;
+                }
+                let right_res = right.evaluate();
+                if ! right_res.success {
+                    return right_res;
+                }
+                return EvaluationResult {
+                    success   : true,
+                    value     : left_res.value - right_res.value,
+                    exception : exceptions::RendererException {
+                        base    : exceptions::RendererExceptionBase::NoException,
+                        message : "".to_string(),
+                        range   : data::Range {
+                            start    : left_res.exception.range.start,
+                            end      : right_res.exception.range.end,
+                            filename : left_res.exception.range.filename
+                        }
+                    }
+                };
+            },
+
+            NodeBase::MultiplicationOperation {left, right} => {
+                let left_res  = left.evaluate();
+                if ! left_res.success {
+                    return left_res;
+                }
+                let right_res = right.evaluate();
+                if ! right_res.success {
+                    return right_res;
+                }
+                return EvaluationResult {
+                    success   : true,
+                    value     : left_res.value * right_res.value,
+                    exception : exceptions::RendererException {
+                        base    : exceptions::RendererExceptionBase::NoException,
+                        message : "".to_string(),
+                        range   : data::Range {
+                            start    : left_res.exception.range.start,
+                            end      : right_res.exception.range.end,
+                            filename : left_res.exception.range.filename
+                        }
+                    }
+                };
+            },
+
+            NodeBase::DivisionOperation {left, right} => {
+                let left_res  = left.evaluate();
+                if ! left_res.success {
+                    return left_res;
+                }
+                let right_res = right.evaluate();
+                if ! right_res.success {
+                    return right_res;
+                }
+                if right_res.value == 0.0 {
+                    return EvaluationResult {
+                        success   : false,
+                        value     : 0.0,
+                        exception : exceptions::RendererException {
+                            base    : exceptions::RendererExceptionBase::DivisionByZeroException,
+                            message : "".to_string(),
+                            range   : data::Range {
+                                start    : left_res.exception.range.start,
+                                end      : right_res.exception.range.end,
+                                filename : left_res.exception.range.filename
+                            }
+                        }
+                    }
+                }
+                return EvaluationResult {
+                    success   : true,
+                    value     : left_res.value / right_res.value,
+                    exception : exceptions::RendererException {
+                        base    : exceptions::RendererExceptionBase::NoException,
+                        message : "".to_string(),
+                        range   : data::Range {
+                            start    : left_res.exception.range.start,
+                            end      : right_res.exception.range.end,
+                            filename : left_res.exception.range.filename
+                        }
+                    }
+                };
+            }
+
+            _ => panic!("Invalid Node Found.")
+
+        };
+    }
 }
 impl fmt::Display for Node {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {

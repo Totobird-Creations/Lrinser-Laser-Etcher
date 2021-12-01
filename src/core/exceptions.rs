@@ -107,7 +107,8 @@ impl fmt::Display for RendererException {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let base_as_string : String;
         base_as_string = match &self.base {
-            RendererExceptionBase::NoException => "NoException"
+            RendererExceptionBase::NoException             => "NoException",
+            RendererExceptionBase::DivisionByZeroException => "DivisionByZeroException"
         }.to_string();
 
         let mut exc = "".to_string();
@@ -118,7 +119,9 @@ impl fmt::Display for RendererException {
 }
 #[derive(Clone, Debug)]
 pub enum RendererExceptionBase {
-    NoException
+    NoException,
+
+    DivisionByZeroException
 }
 
 
