@@ -66,14 +66,39 @@ pub enum NodeBase {
     },
     HeaderFuncExport {
         filename : String
+    },
+
+    FunctionSin {
+        a : Box<Node>
+    },
+    FunctionCos {
+        a : Box<Node>
+    },
+    FunctionTan {
+        a : Box<Node>
     }
 
 
 
 }
 impl Node {
-    fn evaluate(&self) -> EvaluationResult {
+    pub fn evaluate(&self, x : f32) -> EvaluationResult {
         return match &self.base {
+
+            NodeBase::Variable          {name}        => {
+                if *name == "x".to_string() {
+                    return EvaluationResult {
+                        success   : true,
+                        value     : x,
+                        exception : exceptions::RendererException {
+                            base    : exceptions::RendererExceptionBase::NoException,
+                            message : "".to_string(),
+                            range   : self.range.clone()
+                        }
+                    };
+                }
+                panic!("Invalid variable `{}`", name);
+            },
 
             NodeBase::Number            {value}       => EvaluationResult {
                 success   : true,
@@ -86,11 +111,11 @@ impl Node {
             },
 
             NodeBase::AdditionOperation {left, right} => {
-                let left_res  = left.evaluate();
+                let left_res  = left.evaluate(x);
                 if ! left_res.success {
                     return left_res;
                 }
-                let right_res = right.evaluate();
+                let right_res = right.evaluate(x);
                 if ! right_res.success {
                     return right_res;
                 }
@@ -110,11 +135,11 @@ impl Node {
             },
 
             NodeBase::SubtractionOperation {left, right} => {
-                let left_res  = left.evaluate();
+                let left_res  = left.evaluate(x);
                 if ! left_res.success {
                     return left_res;
                 }
-                let right_res = right.evaluate();
+                let right_res = right.evaluate(x);
                 if ! right_res.success {
                     return right_res;
                 }
@@ -134,11 +159,11 @@ impl Node {
             },
 
             NodeBase::MultiplicationOperation {left, right} => {
-                let left_res  = left.evaluate();
+                let left_res  = left.evaluate(x);
                 if ! left_res.success {
                     return left_res;
                 }
-                let right_res = right.evaluate();
+                let right_res = right.evaluate(x);
                 if ! right_res.success {
                     return right_res;
                 }
@@ -158,11 +183,11 @@ impl Node {
             },
 
             NodeBase::DivisionOperation {left, right} => {
-                let left_res  = left.evaluate();
+                let left_res  = left.evaluate(x);
                 if ! left_res.success {
                     return left_res;
                 }
-                let right_res = right.evaluate();
+                let right_res = right.evaluate(x);
                 if ! right_res.success {
                     return right_res;
                 }
@@ -194,9 +219,69 @@ impl Node {
                         }
                     }
                 };
+            },
+
+            NodeBase::FunctionSin {a} => {
+                let res = a.evaluate(x);
+                if ! res.success {
+                    return res;
+                }
+                return EvaluationResult {
+                    success   : true,
+                    value     : res.value.sin(),
+                    exception : exceptions::RendererException {
+                        base    : exceptions::RendererExceptionBase::NoException,
+                        message : "".to_string(),
+                        range   : data::Range {
+                            start    : res.exception.range.start,
+                            end      : res.exception.range.end,
+                            filename : res.exception.range.filename
+                        }
+                    }
+                }
+            },
+
+            NodeBase::FunctionCos {a} => {
+                let res = a.evaluate(x);
+                if ! res.success {
+                    return res;
+                }
+                return EvaluationResult {
+                    success   : true,
+                    value     : res.value.cos(),
+                    exception : exceptions::RendererException {
+                        base    : exceptions::RendererExceptionBase::NoException,
+                        message : "".to_string(),
+                        range   : data::Range {
+                            start    : res.exception.range.start,
+                            end      : res.exception.range.end,
+                            filename : res.exception.range.filename
+                        }
+                    }
+                }
+            },
+
+            NodeBase::FunctionTan {a} => {
+                let res = a.evaluate(x);
+                if ! res.success {
+                    return res;
+                }
+                return EvaluationResult {
+                    success   : true,
+                    value     : res.value.tan(),
+                    exception : exceptions::RendererException {
+                        base    : exceptions::RendererExceptionBase::NoException,
+                        message : "".to_string(),
+                        range   : data::Range {
+                            start    : res.exception.range.start,
+                            end      : res.exception.range.end,
+                            filename : res.exception.range.filename
+                        }
+                    }
+                }
             }
 
-            _ => panic!("Invalid Node Found.")
+            _ => panic!("Invalid Node Found `{}`", self)
 
         };
     }
@@ -213,7 +298,10 @@ impl fmt::Display for Node {
             NodeBase::DivisionOperation       {left, right} => write!(f, "({} / {})", left, right),
             NodeBase::HeaderFuncFrame         {x, y, w, h}  => write!(f, "#frame({}, {}, {}, {})", x, y, w, h),
             NodeBase::HeaderFuncResolution    {w, h}        => write!(f, "#resolution({}, {})", w, h),
-            NodeBase::HeaderFuncExport        {filename}    => write!(f, "#export(`{}`)", data::escapify(filename.clone()))
+            NodeBase::HeaderFuncExport        {filename}    => write!(f, "#export(`{}`)", data::escapify(filename.clone())),
+            NodeBase::FunctionSin             {a}           => write!(f, "sin({})", a),
+            NodeBase::FunctionCos             {a}           => write!(f, "cos({})", a),
+            NodeBase::FunctionTan             {a}           => write!(f, "tan({})", a)
         }
     }
 }

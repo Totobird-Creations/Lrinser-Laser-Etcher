@@ -5,6 +5,11 @@ pub const HEADFUNCS  : [&'static str; 3] = [
     "resolution",
     "export"
 ];
+pub const FUNCTIONS  : [&'static str; 3] = [
+    "sin",
+    "cos",
+    "tan"
+];
 
 
 

@@ -86,6 +86,12 @@ impl Lexer {
                         value : identifier.to_string(),
                         range : self.get_range(start)
                     });
+                } else if data::FUNCTIONS.contains(&identifier.as_str()) {
+                    tokens.push(tokens::Token {
+                        name  : tokens::TK_FUNCTION.to_string(),
+                        value : identifier.to_string(),
+                        range : self.get_range(start)
+                    })
                 } else {
                     for (i, ch) in identifier.chars().enumerate() {
                         tokens.push(tokens::Token {

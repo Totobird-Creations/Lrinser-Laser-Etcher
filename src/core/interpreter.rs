@@ -182,19 +182,22 @@ pub fn interpret_headerfunc_export(mut data : InterpreterData, range : data::Ran
 
 
 
-pub fn interpret_equation_equals(mut data : InterpreterData, range : data::Range, left : nodes::Node, right : nodes::Node) -> InterpreterResult {
-    data.equations.push(nodes::Node {
-        base : nodes::NodeBase::EqualsExpression {
-            left  : Box::new(left),
-            right : Box::new(right),
+pub fn interpret_equation_equals(mut data : InterpreterData, _range : data::Range, left : nodes::Node, right : nodes::Node) -> InterpreterResult {
+    match left.base.clone() {
+        nodes::NodeBase::Variable {name} => {
+            if name == "y".to_string() {
+                data.equations.push(right);
+                return InterpreterResult {
+                    success    : true,
+                    data       : data,
+                    exceptions : vec![]
+                };
+            }
+            false
         },
-        range : range
-    });
-    return InterpreterResult {
-        success    : true,
-        data       : data,
-        exceptions : vec![]
+        _ => false
     };
+    panic!("Invalid left side of equation: `{}`", left);
 }
 
 

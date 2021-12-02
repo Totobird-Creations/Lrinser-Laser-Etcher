@@ -301,6 +301,124 @@ impl Parser {
 
 
     /**************************************************\
+    | FUNCTIONS                                        |
+    \**************************************************/
+
+
+
+    fn function(&mut self) -> ParserResult {
+        if self.token.name != tokens::TK_FUNCTION {
+            return self.failure(exceptions::ParserException {
+                base    : exceptions::ParserExceptionBase::MissingTokenException,
+                message : "Expected (Function) not found.".to_string(),
+                range   : self.token.range.clone()
+            });
+        }
+        let func = self.token.value.clone();
+        self.advance();
+        if self.token.name != tokens::TK_LPAREN {
+            return self.failure(exceptions::ParserException {
+                base    : exceptions::ParserExceptionBase::MissingTokenException,
+                message : "Expected (LeftParen) not found.".to_string(),
+                range   : self.token.range.clone()
+            });
+        }
+        self.advance();
+        let res = match func.as_str() {
+
+            "sin" => self.function_sin(),
+            "cos" => self.function_cos(),
+            "tan" => self.function_tan(),
+
+            _       => panic!("Unknown function: `{}`", func)
+
+        };
+        if ! res.success {
+            return res;
+        }
+        if self.token.name != tokens::TK_RPAREN {
+            return self.failure(exceptions::ParserException {
+                base    : exceptions::ParserExceptionBase::MissingTokenException,
+                message : "Expected (RightParen) not found.".to_string(),
+                range   : self.token.range.clone()
+            });
+        }
+        self.advance();
+        return res;
+    }
+
+
+
+    fn function_sin(&mut self) -> ParserResult {
+        let range = self.token.range.clone();
+
+        let res = self.term();
+        if ! res.success {
+            return res;
+        }
+        let term = res.nodes[0].clone();
+
+        return self.success(vec![nodes::Node {
+            base : nodes::NodeBase::FunctionSin {
+                a : Box::new(term)
+            },
+            range : data::Range {
+                filename : range.filename,
+                start    : range.start,
+                end      : self.token.range.end
+            }
+        }]);
+    }
+
+
+
+    fn function_cos(&mut self) -> ParserResult {
+        let range = self.token.range.clone();
+
+        let res = self.term();
+        if ! res.success {
+            return res;
+        }
+        let term = res.nodes[0].clone();
+
+        return self.success(vec![nodes::Node {
+            base : nodes::NodeBase::FunctionCos {
+                a : Box::new(term)
+            },
+            range : data::Range {
+                filename : range.filename,
+                start    : range.start,
+                end      : self.token.range.end
+            }
+        }]);
+    }
+
+
+
+    fn function_tan(&mut self) -> ParserResult {
+        let range = self.token.range.clone();
+
+        let res = self.term();
+        if ! res.success {
+            return res;
+        }
+        let term = res.nodes[0].clone();
+
+        return self.success(vec![nodes::Node {
+            base : nodes::NodeBase::FunctionTan {
+                a : Box::new(term)
+            },
+            range : data::Range {
+                filename : range.filename,
+                start    : range.start,
+                end      : self.token.range.end
+            }
+        }]);
+    }
+
+
+
+    /**************************************************\
     | TERMS AND EQUATIONS                              |
     \**************************************************/
 
@@ -467,6 +585,10 @@ impl Parser {
                 },
                 range : token.range
             };
+        }
+
+        else if token.name == tokens::TK_FUNCTION {
+            return self.function();
         }
 
         else {

@@ -51,10 +51,25 @@ pub fn render(mut data : interpreter::InterpreterData) -> RendererResult {
             let y1 = data.position.y as f32 + (data.size.y as f32 * (pixel_y as f32 / data.resolution.y as f32));
             let y2 = data.position.y as f32 + (data.size.y as f32 * ((pixel_y as f32 + 1.0) / data.resolution.y as f32));
 
-            //if floor(x as f64, 0) == floor(y as f64, 0) {
-            if (x1 > y1 && x2 < y2) || (x2 > y1 && x1 < y2) {
-                image[pixel_y as usize].push(data::colour(1.0, 0.0, 0.0, 1.0));
-            } else {
+            let mut complete = false;
+
+            for index in 0..data.equations.len() {
+                let equation = &data.equations[index];
+                let r1       = equation.evaluate(x1);
+                let r2       = equation.evaluate(x2);
+                if ! r1.success {
+                    panic!("failed");
+                } else if ! r2.success {
+                    panic!("failed");
+                }
+                if (r1.value > y1 && r2.value < y2) || (r2.value > y1 && r1.value < y2) {
+                    complete = true;
+                    image[pixel_y as usize].push(data::colour(1.0, 0.0, 0.0, 1.0));
+                    break;
+                }
+            }
+
+            if ! complete {
                 image[pixel_y as usize].push(data::colour(1.0, 1.0, 1.0, 1.0));
             }
 

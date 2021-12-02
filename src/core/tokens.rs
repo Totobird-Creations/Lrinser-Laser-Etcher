@@ -22,6 +22,7 @@ pub const TK_RPAREN   : &'static str = "rparen";
 
 pub const TK_HEADER   : &'static str = "#";
 pub const TK_HEADFUNC : &'static str = "headfunc";
+pub const TK_FUNCTION : &'static str = "function";
 pub const TK_COMMA    : &'static str = ",";
 
 pub const TK_EOL      : &'static str = "eol";
