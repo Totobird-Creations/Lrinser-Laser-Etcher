@@ -1,5 +1,5 @@
-]]]]]]]#frame(0, 0, 64, 64)
+#frame(0, 0, 64, 64)
 #resolution(256, 256)
 #export("target.png")
 
-y = 0.5x
+y = 10*sin(x) + 32

@@ -1,41 +1,41 @@
-- Lrinser Project
+- [ ] Lrinser Project
 
-    - Lexer
+    - [x] Lexer
 
-        - Iterate through characters identifiying patterns to locate 'pieces' (ie. tokens).
+        - [x] Iterate through characters identifiying patterns to locate 'pieces' (ie. tokens).
          
          
-    - Parser
+    - [x] Parser
          
-        - Loop through tokens identifiying patterns to create an abstract syntax tree (used for identifying order of operations).
+        - [ ] Loop through tokens identifiying patterns to create an abstract syntax tree (used for identifying order of operations).
          
          
-    - Simplifier
+    - [ ] Simplifier
          
-        - Take the ast and simplify them:
+        - [ ] Take the ast and simplify them:
              
-            - Move all non `y` variables to the right side of the equation, and all `y` variables to the left.
+            - [ ] Move all non `y` variables to the right side of the equation, and all `y` variables to the left.
              
-            - Move all non `y` variables from the left side of the equation to the right.
+            - [ ] Move all non `y` variables from the left side of the equation to the right.
              
              
-    - Interpreter
+    - [ ] Interpreter
          
-        - Take headers and generate image frame.
+        - [x] Take headers and generate image frame.
              
-        - Identify valid equations
+        - [ ] Identify valid equations
              
              
-    - Renderer
+    - [ ] Renderer
          
-        - Draw valid equations into an image or render it as data.
+        - [ ] Draw valid equations into an image or render it as data.
              
              
-    - Printer
+    - [ ] Printer
          
-        - Prepare for laser printing.
+        - [ ] Prepare for laser printing.
              
-        - Send to laser printer.
+        - [ ] Send to laser printer.
 
 
 
