@@ -1,4 +1,4 @@
-- [ ] Lrinser Project
+- [ ] Lrinser Project:
 
     - [x] Lexer
 
@@ -23,22 +23,45 @@
          
         - [x] Take headers and generate image frame.
              
-        - [ ] Identify valid equations
+        - [x] Identify valid equations
              
              
     - [ ] Renderer
          
-        - [ ] Draw valid equations into an image or render it as data.
+        - [x] Draw valid equations into an image or render it as data.
              
              
     - [ ] Printer
-         
+        - [x] Send to printer.
+
         - [ ] Prepare for laser printing.
              
         - [ ] Send to laser printer.
 
 
 
+- Bugs:
+
+    - Circular, Conic, etc shapes have holes in them when the line is almost vertical.
+
+
+
+- Upcoming:
+
+    - Print on Linux.
+
+    - Send to laser cutter.
+
+    - Unary operations
+
+    - Power
+
+    - Optimise renderer (Remove evaluating equations multiple times.)
+
+
+
 - Resources:
      
     - [math.wpi.edu](https://www.math.wpi.edu/IQP/BVCalcHist/calc5.html)
+
+    - [github.com](https://github.com/m4dh0rs3/cas/)

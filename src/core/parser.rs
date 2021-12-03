@@ -5,6 +5,7 @@ use super::data;
 
 
 
+// Success/Failure identification class for parser.
 #[derive(Clone, Debug)]
 pub struct ParserResult {
     pub success   : bool,
@@ -12,6 +13,7 @@ pub struct ParserResult {
     pub exception : exceptions::ParserException
 }
 
+// Success/Failure identification class for getting header function arguments.
 #[derive(Clone, Debug)]
 pub struct HeaderArgsResult {
     pub success   : bool,
@@ -21,6 +23,7 @@ pub struct HeaderArgsResult {
 
 
 
+// Parser class
 #[derive(Clone, Debug)]
 pub struct Parser {
     tokens : Vec<tokens::Token>,
@@ -28,6 +31,7 @@ pub struct Parser {
     token  : tokens::Token
 }
 impl Parser {
+    // Initialize variables on creation.
     fn init(&mut self) {
         self.pos = 0;
         self.token = self.tokens[self.pos].clone();
@@ -35,16 +39,14 @@ impl Parser {
 
 
 
-    /**************************************************\
-    | TOOL METHODS                                     |
-    \**************************************************/
-
+    // Move to next token.
     fn advance(&mut self) {
         self.pos += 1;
         if self.pos < self.tokens.len() {
             self.token = self.tokens[self.pos].clone();
         }
     }
+    // Ease of use function for returning a list of nodes.
     fn success(&mut self, nodes: Vec<nodes::Node>) -> ParserResult {
         return ParserResult {
             success   : true,
@@ -60,6 +62,7 @@ impl Parser {
             }
         }
     }
+    // Ease of use function for returning an exception.
     fn failure(&mut self, exception: exceptions::ParserException) -> ParserResult {
         return ParserResult {
             success   : false,
@@ -70,31 +73,32 @@ impl Parser {
 
 
 
-    /**************************************************\
-    | HANDLES EOLs and EOFs                            |
-    \**************************************************/
-
+    // Start parsing.
     fn parse(&mut self) -> ParserResult {
         let mut nodes = vec![];
+        // Repeat until all tokens have been passed through.
         while self.token.name != tokens::TK_EOF {
+            // Ignore extra newlines.
             while self.token.name == tokens::TK_EOL {
                 self.advance();
             }
+            // Check for end of file.
             if self.token.name == tokens::TK_EOF {break}
             let res;
 
 
+            // If header, parse header function. Else, parse expression.
             if self.token.name == tokens::TK_HEADER {
                 res = self.header();
             } else {
                 res = self.expression();
             }
-
-
             if ! res.success {
                 return res;
             }
+            // Add new node.
             nodes.append(&mut res.nodes.clone());
+            // Next line.
             if self.token.name != tokens::TK_EOL {
                 return ParserResult {
                     success   : false,
@@ -108,6 +112,7 @@ impl Parser {
             }
             self.advance();
         };
+        // Return list of nodes.
         return ParserResult {
             success   : true,
             nodes     : nodes,
@@ -125,14 +130,12 @@ impl Parser {
 
 
 
-    /**************************************************\
-    | HEADERS                                          |
-    \**************************************************/
 
 
-
+    // Header found.
     fn header(&mut self) -> ParserResult {
         self.advance();
+        // Look for header function name.
         if self.token.name != tokens::TK_HEADFUNC {
             return self.failure(exceptions::ParserException {
                 base    : exceptions::ParserExceptionBase::MissingTokenException,
@@ -142,6 +145,7 @@ impl Parser {
         }
         let func = self.token.value.clone();
         self.advance();
+        // Look for opening parenthesis.
         if self.token.name != tokens::TK_LPAREN {
             return self.failure(exceptions::ParserException {
                 base    : exceptions::ParserExceptionBase::MissingTokenException,
@@ -150,6 +154,7 @@ impl Parser {
             });
         }
         self.advance();
+        // Idenfify header function and get arguments.
         let res = match func.as_str() {
 
             "frame"      => self.header_frame(),
@@ -162,6 +167,7 @@ impl Parser {
         if ! res.success {
             return res;
         }
+        // Look for closing parenthesis.
         if self.token.name != tokens::TK_RPAREN {
             return self.failure(exceptions::ParserException {
                 base    : exceptions::ParserExceptionBase::MissingTokenException,
@@ -174,9 +180,10 @@ impl Parser {
     }
 
 
-
+    // Frame header function found.
     fn header_frame(&mut self) -> ParserResult {
         let range = self.token.range.clone();
+        // Get 4 number arguments.
         let res = self.header_get_args(4);
         if ! res.success {
             return self.failure(res.exception);
@@ -197,9 +204,10 @@ impl Parser {
     }
 
 
-
+    // Resolution header function found.
     fn header_resolution(&mut self) -> ParserResult {
         let range = self.token.range.clone();
+        // Get 2 number arguments.
         let res = self.header_get_args(2);
         if ! res.success {
             return self.failure(res.exception);
@@ -218,9 +226,10 @@ impl Parser {
     }
 
 
-
+    // Export header function found.
     fn header_export(&mut self) -> ParserResult {
         let range = self.token.range.clone();
+        // Get 1 string argument.
         if self.token.name != tokens::TK_STRING {
             return self.failure(
                 exceptions::ParserException {
@@ -246,7 +255,7 @@ impl Parser {
     }
 
 
-
+    // Get correct number of header function arguments, separated by commas.
     fn header_get_args(&mut self, arg_count : usize) -> HeaderArgsResult {
         let mut args  : Vec<i32> = vec![];
         for i in 0..arg_count {
@@ -300,13 +309,11 @@ impl Parser {
 
 
 
-    /**************************************************\
-    | FUNCTIONS                                        |
-    \**************************************************/
 
 
-
+    // Function found.
     fn function(&mut self) -> ParserResult {
+        // Look for function name.
         if self.token.name != tokens::TK_FUNCTION {
             return self.failure(exceptions::ParserException {
                 base    : exceptions::ParserExceptionBase::MissingTokenException,
@@ -316,6 +323,7 @@ impl Parser {
         }
         let func = self.token.value.clone();
         self.advance();
+        // Look for opening parenthesis.
         if self.token.name != tokens::TK_LPAREN {
             return self.failure(exceptions::ParserException {
                 base    : exceptions::ParserExceptionBase::MissingTokenException,
@@ -324,11 +332,13 @@ impl Parser {
             });
         }
         self.advance();
+        // Idenfify function and get arguments.
         let res = match func.as_str() {
 
-            "sin" => self.function_sin(),
-            "cos" => self.function_cos(),
-            "tan" => self.function_tan(),
+            "sin"  => self.function_sin(),
+            "cos"  => self.function_cos(),
+            "tan"  => self.function_tan(),
+            "sqrt" => self.function_sqrt(),
 
             _       => panic!("Unknown function: `{}`", func)
 
@@ -336,6 +346,7 @@ impl Parser {
         if ! res.success {
             return res;
         }
+        // Look for closing parenthesis.
         if self.token.name != tokens::TK_RPAREN {
             return self.failure(exceptions::ParserException {
                 base    : exceptions::ParserExceptionBase::MissingTokenException,
@@ -349,9 +360,11 @@ impl Parser {
 
 
 
+    // Sin function found.
     fn function_sin(&mut self) -> ParserResult {
         let range = self.token.range.clone();
 
+        // Get 1 expression argument.
         let res = self.term();
         if ! res.success {
             return res;
@@ -372,9 +385,11 @@ impl Parser {
 
 
 
+    // Cos function found.
     fn function_cos(&mut self) -> ParserResult {
         let range = self.token.range.clone();
 
+        // Get 1 expression argument.
         let res = self.term();
         if ! res.success {
             return res;
@@ -395,9 +410,11 @@ impl Parser {
 
 
 
+    // Tan function found.
     fn function_tan(&mut self) -> ParserResult {
         let range = self.token.range.clone();
 
+        // Get 1 expression argument.
         let res = self.term();
         if ! res.success {
             return res;
@@ -418,12 +435,34 @@ impl Parser {
 
 
 
-    /**************************************************\
-    | TERMS AND EQUATIONS                              |
-    \**************************************************/
+    // Sqrt function found.
+    fn function_sqrt(&mut self) -> ParserResult {
+        let range = self.token.range.clone();
+
+        // Get 1 expression argument.
+        let res = self.term();
+        if ! res.success {
+            return res;
+        }
+        let term = res.nodes[0].clone();
+
+        return self.success(vec![nodes::Node {
+            base : nodes::NodeBase::FunctionSqrt {
+                a : Box::new(term)
+            },
+            range : data::Range {
+                filename : range.filename,
+                start    : range.start,
+                end      : self.token.range.end
+            }
+        }]);
+    }
 
 
 
+
+
+    // term (= term)?
     fn expression(&mut self) -> ParserResult {
         let mut res;
         res = self.term();
@@ -473,12 +512,14 @@ impl Parser {
 
 
 
+    // addition_term
     fn term(&mut self) -> ParserResult {
         return self.addition_term();
     }
 
 
 
+    // multiplication_term ((\+|-) multiplication_term)*
     fn addition_term(&mut self) -> ParserResult {
         let mut res;
         res = self.multiplication_term();
@@ -505,6 +546,7 @@ impl Parser {
 
 
 
+    // literal_multiplication ((\*|\/) literal_multiplication)*
     fn multiplication_term(&mut self) -> ParserResult {
         let mut res;
         res = self.literal_multiplication();
@@ -531,6 +573,7 @@ impl Parser {
 
 
 
+    // literal (literal_multiplication)*
     fn literal_multiplication(&mut self) -> ParserResult {
         let res = self.literal();
         if ! res.success {
@@ -546,6 +589,7 @@ impl Parser {
 
 
 
+    // (LPAREN term RPAREN) | (NUMBER) | (VARIABLE) | (function)
     fn literal(&mut self) -> ParserResult {
         let token = self.token.clone();
         let node;
@@ -609,6 +653,7 @@ impl Parser {
 
 
 
+// Function for parsing a vector of tokens.
 pub fn parse(tokens: Vec<tokens::Token>) -> ParserResult {
     let mut parser = Parser {
         tokens : tokens,

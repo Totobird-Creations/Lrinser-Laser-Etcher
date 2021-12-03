@@ -1,18 +1,24 @@
+// Character lists for lexing.
 pub const ALPHABETIC : &'static str      = "abcdefghijklmnopqrstuvwxyz";
 pub const NUMERIC    : &'static str      = "0123456789";
+
+// Header functions for defining export settings.
 pub const HEADFUNCS  : [&'static str; 3] = [
     "frame",
     "resolution",
     "export"
 ];
-pub const FUNCTIONS  : [&'static str; 3] = [
+// Functions that can be used in expressions.
+pub const FUNCTIONS  : [&'static str; 4] = [
     "sin",
     "cos",
-    "tan"
+    "tan",
+    "sqrt"
 ];
 
 
 
+// Range struct used for identifying where characters came from.
 #[derive(Clone, Debug)]
 pub struct Range {
     pub filename : String,
@@ -22,6 +28,7 @@ pub struct Range {
 
 
 
+// Positioning struct used for header function arguments.
 #[derive(Clone, Debug)]
 pub struct Vector2 {
     pub x : i32,
@@ -30,20 +37,13 @@ pub struct Vector2 {
 
 
 
+// Better colour class to make rendering code prettier.
 #[derive(Clone, Debug)]
 pub struct Colour {
     pub r : f32,
     pub g : f32,
     pub b : f32,
     pub a : f32
-}
-pub fn colour(r : f32, g : f32, b : f32, a : f32) -> Colour {
-    return Colour {
-        r : r,
-        g : g,
-        b : b,
-        a : a
-    };
 }
 
 

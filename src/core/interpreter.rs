@@ -5,6 +5,7 @@ use super::exceptions;
 
 
 
+// Data class for the renderer.
 #[derive(Clone, Debug)]
 pub struct InterpreterData {
     pub set_frame      : bool,
@@ -23,6 +24,7 @@ pub struct InterpreterData {
 
 
 
+// Success/Failure identification class.
 #[derive(Clone, Debug)]
 pub struct InterpreterResult {
     pub success    : bool,
@@ -32,6 +34,7 @@ pub struct InterpreterResult {
 
 
 
+// Function for interpreting a vector of nodes.
 pub fn interpret(nodes : Vec<nodes::Node>) -> InterpreterResult {
     let mut data = InterpreterData {
         set_frame      : false,
@@ -75,6 +78,7 @@ pub fn interpret(nodes : Vec<nodes::Node>) -> InterpreterResult {
 
 
 
+// Frame header function interpreter
 pub fn interpret_headerfunc_frame(mut data : InterpreterData, range : data::Range, x : i32, y : i32, w : i32, h : i32) -> InterpreterResult {
     if w <= 0 || h <= 0 {
         return InterpreterResult {
@@ -118,6 +122,7 @@ pub fn interpret_headerfunc_frame(mut data : InterpreterData, range : data::Rang
 
 
 
+// Resolution header function interpreter
 pub fn interpret_headerfunc_resolution(mut data : InterpreterData, range : data::Range, w : i32, h : i32) -> InterpreterResult {
     if w < 0 || h < 0 {
         return InterpreterResult {
@@ -157,6 +162,7 @@ pub fn interpret_headerfunc_resolution(mut data : InterpreterData, range : data:
 
 
 
+// Export header function interpreter
 pub fn interpret_headerfunc_export(mut data : InterpreterData, range : data::Range, filename : String) -> InterpreterResult {
     if data.set_export {
         return InterpreterResult {
@@ -182,6 +188,7 @@ pub fn interpret_headerfunc_export(mut data : InterpreterData, range : data::Ran
 
 
 
+// Equality equation interpreter
 pub fn interpret_equation_equals(mut data : InterpreterData, _range : data::Range, left : nodes::Node, right : nodes::Node) -> InterpreterResult {
     match left.base.clone() {
         nodes::NodeBase::Variable {name} => {
@@ -202,6 +209,7 @@ pub fn interpret_equation_equals(mut data : InterpreterData, _range : data::Rang
 
 
 
+// Fallback for unknown nodes
 pub fn interpret_unknown(data : InterpreterData) -> InterpreterResult {
     println!("Unknown node found");
     return InterpreterResult {

@@ -5,6 +5,7 @@ use super::data;
 
 
 
+// Exception class for the lexer.
 #[derive(Clone, Debug)]
 pub struct LexerException {
     pub base    : LexerExceptionBase,
@@ -27,6 +28,7 @@ impl fmt::Display for LexerException {
         write!(f, "{}", exc)
     }
 }
+// Lexer exception bases.
 #[derive(Clone, Debug)]
 pub enum LexerExceptionBase {
     NoException,
@@ -38,6 +40,7 @@ pub enum LexerExceptionBase {
 
 
 
+// Exception class for the parser.
 #[derive(Clone, Debug)]
 pub struct ParserException {
     pub base    : ParserExceptionBase,
@@ -59,6 +62,7 @@ impl fmt::Display for ParserException {
         write!(f, "{}", exc)
     }
 }
+// Parser exception bases.
 #[derive(Clone, Debug)]
 pub enum ParserExceptionBase {
     NoException,
@@ -69,6 +73,7 @@ pub enum ParserExceptionBase {
 
 
 
+// Exception class for the interpreter.
 #[derive(Clone, Debug)]
 pub struct InterpreterException {
     pub base    : InterpreterExceptionBase,
@@ -89,6 +94,7 @@ impl fmt::Display for InterpreterException {
         write!(f, "{}", exc)
     }
 }
+// Interpreter exception bases.
 #[derive(Clone, Debug)]
 pub enum InterpreterExceptionBase {
     InvalidValueException,
@@ -97,6 +103,7 @@ pub enum InterpreterExceptionBase {
 
 
 
+// Exception class for the renderer.
 #[derive(Clone, Debug)]
 pub struct RendererException {
     pub base    : RendererExceptionBase,
@@ -117,6 +124,7 @@ impl fmt::Display for RendererException {
         write!(f, "{}", exc)
     }
 }
+// Renderer exception bases.
 #[derive(Clone, Debug)]
 pub enum RendererExceptionBase {
     NoException,
@@ -126,17 +134,18 @@ pub enum RendererExceptionBase {
 
 
 
+// Exception class for the printer.
 #[derive(Clone, Debug)]
 pub struct PrinterException {
     pub base    : PrinterExceptionBase,
-    pub message : String,
-    pub range   : data::Range
+    pub message : String
 }
 impl fmt::Display for PrinterException {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let base_as_string : String;
         base_as_string = match &self.base {
-            PrinterExceptionBase::NoException => "NoException"
+            PrinterExceptionBase::NoException                         => "NoException",
+            PrinterExceptionBase::UnsupportedOperatingSystemException => "UnsupportedOperatingSystemException"
         }.to_string();
 
         let mut exc = "".to_string();
@@ -145,7 +154,10 @@ impl fmt::Display for PrinterException {
         write!(f, "{}", exc)
     }
 }
+// Printer exception bases.
 #[derive(Clone, Debug)]
 pub enum PrinterExceptionBase {
-    NoException
+    NoException,
+
+    UnsupportedOperatingSystemException
 }

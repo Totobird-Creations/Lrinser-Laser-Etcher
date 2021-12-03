@@ -4,6 +4,8 @@ use super::data;
 
 
 
+// Different token types
+
 pub const TK_NULL     : &'static str = "null";
 
 pub const TK_VARIABLE : &'static str = "variable";
@@ -29,6 +31,8 @@ pub const TK_EOL      : &'static str = "eol";
 pub const TK_EOF      : &'static str = "eof";
 
 
+
+// Token class
 
 #[derive(Clone, Debug)]
 pub struct Token {

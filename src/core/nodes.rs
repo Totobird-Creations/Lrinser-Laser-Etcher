@@ -6,6 +6,7 @@ use super::exceptions;
 
 
 
+// Success/Failure identification class.
 #[derive(Clone, Debug)]
 pub struct EvaluationResult {
     pub success   : bool,
@@ -15,6 +16,7 @@ pub struct EvaluationResult {
 
 
 
+// Nodes for AST.
 #[derive(Clone, Debug)]
 pub struct Node {
     pub base  : NodeBase,
@@ -25,18 +27,22 @@ pub enum NodeBase {
 
 
 
+    // NODE = NODE
     EqualsExpression {
         left  : Box<Node>,
         right : Box<Node>
     },
 
+    // Integer, Float, etc
     Number {
         value : f32
     },
+    // Single character
     Variable {
         name  : String
     },
 
+    // NODE (+|-|*|/) NODE
     AdditionOperation {
         left  : Box<Node>,
         right : Box<Node>
@@ -54,6 +60,7 @@ pub enum NodeBase {
         right : Box<Node>
     },
 
+    // #header_function_name(arg1, arg2, etc)
     HeaderFuncFrame {
         x : i32,
         y : i32,
@@ -68,6 +75,7 @@ pub enum NodeBase {
         filename : String
     },
 
+    // function_name(arg1, arg2, etc)
     FunctionSin {
         a : Box<Node>
     },
@@ -76,15 +84,20 @@ pub enum NodeBase {
     },
     FunctionTan {
         a : Box<Node>
+    },
+    FunctionSqrt {
+        a : Box<Node>
     }
 
 
 
 }
+// Method for evaluating the value of an expression.
 impl Node {
     pub fn evaluate(&self, x : f32) -> EvaluationResult {
         return match &self.base {
 
+            // If variable name is `x`, return the value of x.
             NodeBase::Variable          {name}        => {
                 if *name == "x".to_string() {
                     return EvaluationResult {
@@ -100,6 +113,7 @@ impl Node {
                 panic!("Invalid variable `{}`", name);
             },
 
+            // Return number value.
             NodeBase::Number            {value}       => EvaluationResult {
                 success   : true,
                 value     : *value,
@@ -110,6 +124,7 @@ impl Node {
                 }
             },
 
+            // Evaluate left and right values, then add right to left.
             NodeBase::AdditionOperation {left, right} => {
                 let left_res  = left.evaluate(x);
                 if ! left_res.success {
@@ -134,6 +149,7 @@ impl Node {
                 };
             },
 
+            // Evaluate left and right values, then subtraft right from left.
             NodeBase::SubtractionOperation {left, right} => {
                 let left_res  = left.evaluate(x);
                 if ! left_res.success {
@@ -158,6 +174,7 @@ impl Node {
                 };
             },
 
+            // Evaluate left and right values, then multiply left and right.
             NodeBase::MultiplicationOperation {left, right} => {
                 let left_res  = left.evaluate(x);
                 if ! left_res.success {
@@ -182,6 +199,7 @@ impl Node {
                 };
             },
 
+            // If right is not 0, evaluate left and right values, then divide right from left.
             NodeBase::DivisionOperation {left, right} => {
                 let left_res  = left.evaluate(x);
                 if ! left_res.success {
@@ -221,6 +239,7 @@ impl Node {
                 };
             },
 
+            // Evaluate argument and return sin value.
             NodeBase::FunctionSin {a} => {
                 let res = a.evaluate(x);
                 if ! res.success {
@@ -241,6 +260,7 @@ impl Node {
                 }
             },
 
+            // Evaluate argument and return cos value.
             NodeBase::FunctionCos {a} => {
                 let res = a.evaluate(x);
                 if ! res.success {
@@ -261,6 +281,7 @@ impl Node {
                 }
             },
 
+            // Evaluate argument and return tan value.
             NodeBase::FunctionTan {a} => {
                 let res = a.evaluate(x);
                 if ! res.success {
@@ -279,13 +300,36 @@ impl Node {
                         }
                     }
                 }
+            },
+
+            // Evaluate argument and return sqrt value.
+            NodeBase::FunctionSqrt {a} => {
+                let res = a.evaluate(x);
+                if ! res.success {
+                    return res;
+                }
+                return EvaluationResult {
+                    success   : true,
+                    value     : res.value.sqrt(),
+                    exception : exceptions::RendererException {
+                        base    : exceptions::RendererExceptionBase::NoException,
+                        message : "".to_string(),
+                        range   : data::Range {
+                            start    : res.exception.range.start,
+                            end      : res.exception.range.end,
+                            filename : res.exception.range.filename
+                        }
+                    }
+                }
             }
 
+            // Unknown node found.
             _ => panic!("Invalid Node Found `{}`", self)
 
         };
     }
 }
+// Displays for different types of nodes for debugging.
 impl fmt::Display for Node {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match &self.base {
@@ -301,10 +345,12 @@ impl fmt::Display for Node {
             NodeBase::HeaderFuncExport        {filename}    => write!(f, "#export(`{}`)", data::escapify(filename.clone())),
             NodeBase::FunctionSin             {a}           => write!(f, "sin({})", a),
             NodeBase::FunctionCos             {a}           => write!(f, "cos({})", a),
-            NodeBase::FunctionTan             {a}           => write!(f, "tan({})", a)
+            NodeBase::FunctionTan             {a}           => write!(f, "tan({})", a),
+            NodeBase::FunctionSqrt             {a}          => write!(f, "sqrt({})", a)
         }
     }
 }
+// Ease of use addition implementation.
 impl ops::Add for Node {
     type Output = Self;
     fn add(self, other: Node) -> Self {
@@ -321,6 +367,7 @@ impl ops::Add for Node {
         };
     }
 }
+// Ease of use subtraction implementation.
 impl ops::Sub for Node {
     type Output = Self;
     fn sub(self, other: Node) -> Self {
@@ -337,6 +384,7 @@ impl ops::Sub for Node {
         };
     }
 }
+// Ease of use multiplication implementation.
 impl ops::Mul for Node {
     type Output = Self;
     fn mul(self, other: Node) -> Self {
@@ -353,6 +401,7 @@ impl ops::Mul for Node {
         };
     }
 }
+// Ease of use division implementation.
 impl ops::Div for Node {
     type Output = Self;
     fn div(self, other: Node) -> Self {

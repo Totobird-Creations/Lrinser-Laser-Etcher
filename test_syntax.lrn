@@ -1,5 +1,24 @@
-#frame(0, 0, 64, 64)
-#resolution(256, 256)
+#frame(-16, -16, 32, 32)
+#resolution(128, 128)
 #export("target.png")
 
-y = 10*sin(x) + 32
+y = sqrt( 1 - xx )
+y = 0 - sqrt( 1 - xx )
+
+y = sqrt( 3 - xx )
+y = 0 - sqrt( 3 - xx )
+
+y = sqrt( 5 - xx )
+y = 0 - sqrt( 5 - xx )
+
+y = sqrt( 0-xx - 14x - 25 ) / 2
+y = 0 - sqrt( 0-xx - 14x - 25 ) / 2
+
+y = sqrt( 0-xx + 14x - 25 ) / 2
+y = 0 - sqrt( 0-xx + 14x - 25 ) / 2
+
+y = 2 sqrt( 6 - xx ) + 7
+y = 0 - 2 sqrt( 6 - xx ) + 7
+
+y = 2 sqrt( 6 - xx ) - 7
+y = 0 - 2 sqrt( 6 - xx ) - 7

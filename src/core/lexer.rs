@@ -6,6 +6,7 @@ use super::exceptions;
 
 
 
+// Success/Failure identification class.
 #[derive(Clone, Debug)]
 pub struct LexerResult {
     pub success   : bool,
@@ -15,6 +16,7 @@ pub struct LexerResult {
 
 
 
+// Lexer class
 #[derive(Clone, Debug)]
 struct Lexer {
     filename : String,
@@ -25,6 +27,7 @@ struct Lexer {
     end      : bool
 }
 impl Lexer {
+    // Initialize variables on creation.
     pub fn init(&mut self) {
         if self.script.len() >= 1 {
             self.ch = self.chars[0];
@@ -35,6 +38,7 @@ impl Lexer {
         }
     }
 
+    // Move to next character.
     fn advance(&mut self) {
         self.pos += 1;
         if self.pos < self.chars.len() {
@@ -45,6 +49,7 @@ impl Lexer {
         }
     }
 
+    // Get data::Range class with start as argument and end as current.
     fn get_range(&mut self, start : usize) -> data::Range {
         return data::Range {
             filename : self.filename.clone(),
@@ -53,16 +58,20 @@ impl Lexer {
         }
     }
 
+    // Start lexing.
     pub fn lex(&mut self) -> LexerResult {
         let mut tokens : Vec<tokens::Token> = vec![];
 
+        // Repeat until all characters have been passed through.
         while ! self.end {
 
+            // Ignore spaces and tabs.
             if [' ', '\t'].contains(&self.ch) {
                 self.advance();
             }
 
             
+            // Line feed and carriage return mean newline.
             else if ['\n', '\r'].contains(&self.ch) {
                 tokens.push(tokens::Token {
                     name  : tokens::TK_EOL.to_string(),
@@ -73,6 +82,7 @@ impl Lexer {
             }
 
 
+            // Variables, Header functions, and Functions.
             else if data::ALPHABETIC.contains(self.ch) {
                 let mut identifier = "".to_string();
                 let     start      = self.pos;
@@ -108,6 +118,7 @@ impl Lexer {
             }
 
 
+            // Numbers.
             else if data::NUMERIC.contains(self.ch) {
                 let mut num   = "".to_string();
                 let mut dots  = 0;
@@ -136,6 +147,7 @@ impl Lexer {
             }
 
 
+            // Strings.
             else if self.ch == '"' {
                 let mut string = "".to_string();
                 let     start  = self.pos;
@@ -210,6 +222,9 @@ impl Lexer {
             }
 
 
+            // Operation Characters.
+
+
             else if self.ch == '=' {
                 tokens.push(tokens::Token {
                     name  : tokens::TK_EQUALS.to_string(),
@@ -260,6 +275,9 @@ impl Lexer {
             }
 
 
+            // Parenthesis.
+
+
             else if self.ch == '(' {
                 tokens.push(tokens::Token {
                     name  : tokens::TK_LPAREN.to_string(),
@@ -280,6 +298,7 @@ impl Lexer {
             }
 
 
+            // Header function hash.
             else if self.ch == '#' {
                 tokens.push(tokens::Token {
                     name  : tokens::TK_HEADER.to_string(),
@@ -290,6 +309,7 @@ impl Lexer {
             }
 
 
+            // Comma.
             else if self.ch == ',' {
                 tokens.push(tokens::Token {
                     name  : tokens::TK_COMMA.to_string(),
@@ -300,6 +320,7 @@ impl Lexer {
             }
 
 
+            // Unknown characters result in error.
             else {
                 return LexerResult {
                     success   : false,
@@ -316,6 +337,8 @@ impl Lexer {
 
         }
 
+        // End with EOL and EOF for easier parsing.
+
         tokens.push(tokens::Token {
             name  : tokens::TK_EOL.to_string(),
             value : "".to_string(),
@@ -327,6 +350,8 @@ impl Lexer {
             value : "".to_string(),
             range : self.get_range(self.pos)
         });
+
+        // Return list of tokens.
 
         return LexerResult {
             success     : true,
@@ -343,6 +368,7 @@ impl Lexer {
 
 
 
+// Function for lexing a string.
 pub fn lex(filename: String, script: String) -> LexerResult {
     let mut lexer = Lexer {
         filename : filename,

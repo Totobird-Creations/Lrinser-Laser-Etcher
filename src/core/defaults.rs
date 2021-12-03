@@ -2,6 +2,7 @@ use super::data;
 
 
 
+// Default values for header functions.
 pub const POSITION   : data::Vector2 = data::Vector2 {
     x : 0,
     y : 0
