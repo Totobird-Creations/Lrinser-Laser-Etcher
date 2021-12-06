@@ -1,5 +1,5 @@
 #frame(-16, -16, 32, 32)
-#resolution(128, 128)
+#resolution(32, 32)
 #export("target.png")
 
 y = sqrt( 1 - xx )

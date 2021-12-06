@@ -1,6 +1,8 @@
 use std::process::exit;
 use std::fs;
 
+use super::logger;
+use super::data;
 use super::lexer;
 use super::parser;
 use super::simplifier;
@@ -12,6 +14,8 @@ use super::printer;
 
 // Function for easily running from filename. 
 pub fn run(filename: &str) {
+    logger::info!("Commencing print on file `{}`", data::escapify(filename.to_string()));
+
     // Read script file.
     let script = read(filename);
 
@@ -49,11 +53,11 @@ pub fn run(filename: &str) {
     }
 
     // Print export file.
-    let printer_res = printer::print(renderer_res.export_filename);
+    /*let printer_res = printer::print(renderer_res.export_filename);
     if !printer_res.success {
         println!("{}", printer_res.exception);
         exit(1);
-    }
+    }*/
 }
 
 
