@@ -4,6 +4,7 @@
 
 y = sqrt( 1 - xx )
 y = 0 - sqrt( 1 - xx )
+x = 5
 
 y = sqrt( 3 - xx )
 y = 0 - sqrt( 3 - xx )

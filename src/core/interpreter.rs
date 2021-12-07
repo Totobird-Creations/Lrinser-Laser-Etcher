@@ -1,3 +1,4 @@
+use super::logger;
 use super::data;
 use super::defaults;
 use super::nodes;
@@ -204,7 +205,12 @@ pub fn interpret_equation_equals(mut data : InterpreterData, _range : data::Rang
         },
         _ => false
     };
-    panic!("Invalid left side of equation: `{}`", left);
+    logger::error(format!("Invalid left side of expression: `{}`. Ignoring.", left));
+    return InterpreterResult {
+        success    : true,
+        data       : data,
+        exceptions : vec![]
+    };
 }
 
 

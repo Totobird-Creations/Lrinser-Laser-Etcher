@@ -1,6 +1,7 @@
 use std::fmt;
 use std::ops;
 
+use super::logger;
 use super::data;
 use super::exceptions;
 
@@ -110,7 +111,16 @@ impl Node {
                         }
                     };
                 }
-                panic!("Invalid variable `{}`", name);
+                logger::error("Invalid Variable Name");
+                return EvaluationResult {
+                    success   : false,
+                    value     : 0.0,
+                    exception : exceptions::RendererException {
+                        base    : exceptions::RendererExceptionBase::InvalidVariableException,
+                        message : format!("Invalid variable `{}` was found.", name),
+                        range   : self.range.clone()
+                    }
+                };
             },
 
             // Return number value.
@@ -324,7 +334,19 @@ impl Node {
             }
 
             // Unknown node found.
-            _ => panic!("Invalid Node Found `{}`", self)
+            _ => return EvaluationResult {
+                success   : false,
+                value     : 0.0,
+                exception : exceptions::RendererException {
+                    base    : exceptions::RendererExceptionBase::InternalException,
+                    message : format!("Unknown node `{}` found.", self).to_string(),
+                    range   : data::Range {
+                        start    : self.range.start,
+                        end      : self.range.end,
+                        filename : self.range.filename.clone()
+                    }
+                }
+            }
 
         };
     }

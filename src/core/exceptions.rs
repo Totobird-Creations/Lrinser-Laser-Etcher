@@ -1,5 +1,5 @@
 use std::fmt;
-use colored::*;
+use colored::Colorize;
 
 use super::data;
 
@@ -114,8 +114,10 @@ impl fmt::Display for RendererException {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let base_as_string : String;
         base_as_string = match &self.base {
-            RendererExceptionBase::NoException             => "NoException",
-            RendererExceptionBase::DivisionByZeroException => "DivisionByZeroException"
+            RendererExceptionBase::NoException              => "NoException".normal(),
+            RendererExceptionBase::DivisionByZeroException  => "DivisionByZeroException".normal(),
+            RendererExceptionBase::InvalidVariableException => "InvalidVariableException".normal(),
+            RendererExceptionBase::InternalException        => "InternalException".on_bright_red().white().bold()
         }.to_string();
 
         let mut exc = "".to_string();
@@ -129,7 +131,9 @@ impl fmt::Display for RendererException {
 pub enum RendererExceptionBase {
     NoException,
 
-    DivisionByZeroException
+    DivisionByZeroException,
+    InvalidVariableException,
+    InternalException
 }
 
 

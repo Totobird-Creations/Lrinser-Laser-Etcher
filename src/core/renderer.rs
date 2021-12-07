@@ -55,7 +55,21 @@ pub fn render(mut data : interpreter::InterpreterData) -> RendererResult {
         for index in 0..data.equations.len() {
             let equation = &data.equations[index];
             let r1       = equation.evaluate(x1);
+            if ! r1.success {
+                return RendererResult {
+                    success         : false,
+                    export_filename : "".to_string(),
+                    exception       : r1.exception
+                };
+            }
             let r2       = equation.evaluate(x2);
+            if ! r2.success {
+                return RendererResult {
+                    success         : false,
+                    export_filename : "".to_string(),
+                    exception       : r2.exception
+                };
+            }
             if (r1.value > y1 && r2.value < y2) || (r2.value > y1 && r1.value < y2) {
                 colour.g = 0.0;
                 colour.b = 0.0;
