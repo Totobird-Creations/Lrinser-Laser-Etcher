@@ -52,11 +52,11 @@
 
     - Send to laser cutter.
 
-    - Unary operations
+    - Unary operations.
 
-    - Power
+    - Power.
 
-    - Optimise renderer (Remove evaluating equations multiple times.)
+    - Sqrt returns multiple values.
 
 
 

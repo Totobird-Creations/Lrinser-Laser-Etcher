@@ -1,12 +1,17 @@
+use std::ops;
+
+
+
 // Character lists for lexing.
 pub const ALPHABETIC : &'static str      = "abcdefghijklmnopqrstuvwxyz";
 pub const NUMERIC    : &'static str      = "0123456789";
 
 // Header functions for defining export settings.
-pub const HEADFUNCS  : [&'static str; 3] = [
+pub const HEADFUNCS  : [&'static str; 4] = [
     "frame",
     "resolution",
-    "export"
+    "export",
+    "print_now"
 ];
 // Functions that can be used in expressions.
 pub const FUNCTIONS  : [&'static str; 4] = [
@@ -44,6 +49,131 @@ pub struct Colour {
     pub g : f32,
     pub b : f32,
     pub a : f32
+}
+
+
+
+// Renderer multiple values.
+#[derive(Clone, Debug)]
+pub struct MultipleValues {
+    pub values : Vec<f32>
+}
+impl MultipleValues {
+    pub fn new_empty() -> MultipleValues {
+        return MultipleValues {
+            values : vec![]
+        };
+    }
+    pub fn new_single(value : f32) -> MultipleValues {
+        return MultipleValues {
+            values : vec![value]
+        };
+    }
+
+    pub fn sin(self) -> MultipleValues {
+        let mut res = vec![];
+        for x in self.values {
+            res.push(x.sin());
+        }
+        return MultipleValues {
+            values : res
+        }
+    }
+
+    pub fn cos(self) -> MultipleValues {
+        let mut res = vec![];
+        for x in self.values {
+            res.push(x.cos());
+        }
+        return MultipleValues {
+            values : res
+        }
+    }
+
+    pub fn tan(self) -> MultipleValues {
+        let mut res = vec![];
+        for x in self.values {
+            res.push(x.tan());
+        }
+        return MultipleValues {
+            values : res
+        }
+    }
+
+    pub fn sqrt(self) -> MultipleValues {
+        let mut res = vec![];
+        for x in self.values {
+            res.push(x.sqrt());
+            res.push(-x.sqrt());
+        }
+        return MultipleValues {
+            values : res
+        }
+    }
+}
+impl ops::Add for MultipleValues {
+    type Output = Self;
+    fn add(self, other: MultipleValues) -> Self {
+        let mut res = vec![];
+        for x in self.values {
+            for y in other.values.clone() {
+                res.push(x + y);
+            }
+        }
+        return MultipleValues {
+            values : res
+        };
+    }
+}
+impl ops::Sub for MultipleValues {
+    type Output = Self;
+    fn sub(self, other: MultipleValues) -> Self {
+        let mut res = vec![];
+        for x in self.values {
+            for y in other.values.clone() {
+                res.push(x - y);
+            }
+        }
+        return MultipleValues {
+            values : res
+        };
+    }
+}
+impl ops::Mul for MultipleValues {
+    type Output = Self;
+    fn mul(self, other: MultipleValues) -> Self {
+        let mut res = vec![];
+        for x in self.values {
+            for y in other.values.clone() {
+                res.push(x * y);
+            }
+        }
+        return MultipleValues {
+            values : res
+        };
+    }
+}
+impl ops::Div for MultipleValues {
+    type Output = Self;
+    fn div(self, other: MultipleValues) -> Self {
+        let mut res = vec![];
+        for x in self.values {
+            for y in other.values.clone() {
+                res.push(x / y);
+            }
+        }
+        return MultipleValues {
+            values : res
+        };
+    }
+}
+
+
+// Renderer pixel min-max value.
+#[derive(Clone, Debug)]
+pub struct MinMax {
+    pub min : MultipleValues,
+    pub max : MultipleValues
 }
 
 

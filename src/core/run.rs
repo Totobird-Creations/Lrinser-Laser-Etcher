@@ -55,20 +55,24 @@ pub fn run(filename: &str) {
 
     // Render interpreter data.
     logger::debug(format!("Rendering data."));
-    let renderer_res = renderer::render(interpreter_res.data);
+    let renderer_res = renderer::render(interpreter_res.data.clone());
     if !renderer_res.success {
         logger::critical("Rendering failed. Error provided:");
         println!("\n{}", renderer_res.exception);
         exit(1);
     }
 
-    logger::warning(format!("Printer disabled. Skipping."));
     // Print export file.
-    /*let printer_res = printer::print(renderer_res.export_filename);
-    if !printer_res.success {
-        println!("{}", printer_res.exception);
-        exit(1);
-    }*/
+    if interpreter_res.data.print_now {
+        logger::debug(format!("Printing image."));
+        let printer_res = printer::print(renderer_res.export_filename);
+        if !printer_res.success {
+            println!("{}", printer_res.exception);
+            exit(1);
+        }
+    } else {
+        logger::warning(format!("Printer disabled. Skipping."));
+    }
     logger::success("All jobs finished.");
 }
 

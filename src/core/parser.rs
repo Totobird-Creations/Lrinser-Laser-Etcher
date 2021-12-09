@@ -160,8 +160,13 @@ impl Parser {
             "frame"      => self.header_frame(),
             "resolution" => self.header_resolution(),
             "export"     => self.header_export(),
+            "print_now"  => self.header_print_now(),
 
-            _       => panic!("Unknown header function: `{}`", func)
+            _       => return self.failure(exceptions::ParserException {
+                base    : exceptions::ParserExceptionBase::InternalException,
+                message : format!("Invalid header function found: `{}`", func),
+                range   : self.token.range.clone()
+            })
 
         };
         if ! res.success {
@@ -246,6 +251,21 @@ impl Parser {
             base : nodes::NodeBase::HeaderFuncExport {
                 filename : filename
             },
+            range : data::Range {
+                filename : range.filename,
+                start    : range.start,
+                end      : self.token.range.end
+            }
+        }]);
+    }
+
+
+    // Export header function found.
+    fn header_print_now(&mut self) -> ParserResult {
+        let range = self.token.range.clone();
+
+        return self.success(vec![nodes::Node {
+            base : nodes::NodeBase::HeaderFuncPrintNow,
             range : data::Range {
                 filename : range.filename,
                 start    : range.start,
@@ -340,7 +360,11 @@ impl Parser {
             "tan"  => self.function_tan(),
             "sqrt" => self.function_sqrt(),
 
-            _       => panic!("Unknown function: `{}`", func)
+            _       => return self.failure(exceptions::ParserException {
+                base    : exceptions::ParserExceptionBase::InternalException,
+                message : format!("Invalid function found: `{}`", func),
+                range   : self.token.range.clone()
+            })
 
         };
         if ! res.success {

@@ -26,23 +26,37 @@ pub fn render(mut data : interpreter::InterpreterData) -> RendererResult {
 
     // Create image
     let mut buffer = image::ImageBuffer::new(data.resolution.x as u32, data.resolution.y as u32);
-    /*for index in 0..data.equations.len() {
-        for pixel_x in 0..data.resolution.x {
-            let x1 = data.position.x as f32 + (data.size.x as f32 * (pixel_x as f32 / data.resolution.x as f32));
-            let x2 = data.position.x as f32 + (data.size.x as f32 * ((pixel_x as f32 + 1.0) / data.resolution.x as f32));
+    // Get values for each equation at each x pixel.
+    let mut values = vec![];
+    for pixel_x in 0..data.resolution.x {
+        values.push(vec![]);
+        let x1 = data.position.x as f32 + (data.size.x as f32 * (pixel_x as f32 / data.resolution.x as f32));
+        let x2 = data.position.x as f32 + (data.size.x as f32 * ((pixel_x as f32 + 1.0) / data.resolution.x as f32));
+        for index in 0..data.equations.len() {
             let equation = &data.equations[index];
             let r1       = equation.evaluate(x1);
             let r2       = equation.evaluate(x2);
             if ! r1.success {
-                panic!("failed");
+                return RendererResult {
+                    success         : false,
+                    export_filename : "".to_string(),
+                    exception       : r1.exception
+                };
             } else if ! r2.success {
-                panic!("failed");
+                return RendererResult {
+                    success         : false,
+                    export_filename : "".to_string(),
+                    exception       : r2.exception
+                };
             }
+            values[pixel_x as usize].push(data::MinMax {
+                min : r1.value,
+                max : r2.value
+            });
         }
-    }*/
+    }
+    // Draw equation values to image.
     for (pixel_x, pixel_y, pixel) in buffer.enumerate_pixels_mut() {
-        let x1 = data.position.x as f32 + (data.size.x as f32 * (pixel_x as f32 / data.resolution.x as f32));
-        let x2 = data.position.x as f32 + (data.size.x as f32 * ((pixel_x as f32 + 1.0) / data.resolution.x as f32));
         let y1 = data.position.y as f32 + (data.size.y as f32 * (pixel_y as f32 / data.resolution.y as f32));
         let y2 = data.position.y as f32 + (data.size.y as f32 * ((pixel_y as f32 + 1.0) / data.resolution.y as f32));
 
@@ -52,27 +66,23 @@ pub fn render(mut data : interpreter::InterpreterData) -> RendererResult {
             b : 1.0,
             a : 1.0
         };
+        let mut done = false;
         for index in 0..data.equations.len() {
-            let equation = &data.equations[index];
-            let r1       = equation.evaluate(x1);
-            if ! r1.success {
-                return RendererResult {
-                    success         : false,
-                    export_filename : "".to_string(),
-                    exception       : r1.exception
-                };
+            let r1       = values[pixel_x as usize][index].min.clone();
+            let r2       = values[pixel_x as usize][index].max.clone();
+            for i in 0..r1.values.len() {
+                let r1v = r1.values[i];
+                let r2v = r2.values[i];
+                if (r1v > y1 && r2v < y2) || (r2v > y1 && r1v < y2) {
+                    colour.g = 0.0;
+                    colour.b = 0.0;
+                    done = true;
+                }
+                if done {
+                    break;
+                }
             }
-            let r2       = equation.evaluate(x2);
-            if ! r2.success {
-                return RendererResult {
-                    success         : false,
-                    export_filename : "".to_string(),
-                    exception       : r2.exception
-                };
-            }
-            if (r1.value > y1 && r2.value < y2) || (r2.value > y1 && r1.value < y2) {
-                colour.g = 0.0;
-                colour.b = 0.0;
+            if done {
                 break;
             }
         }

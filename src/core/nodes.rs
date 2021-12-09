@@ -11,7 +11,7 @@ use super::exceptions;
 #[derive(Clone, Debug)]
 pub struct EvaluationResult {
     pub success   : bool,
-    pub value     : f32,
+    pub value     : data::MultipleValues,
     pub exception : exceptions::RendererException
 }
 
@@ -75,6 +75,7 @@ pub enum NodeBase {
     HeaderFuncExport {
         filename : String
     },
+    HeaderFuncPrintNow,
 
     // function_name(arg1, arg2, etc)
     FunctionSin {
@@ -103,7 +104,7 @@ impl Node {
                 if *name == "x".to_string() {
                     return EvaluationResult {
                         success   : true,
-                        value     : x,
+                        value     : data::MultipleValues::new_single(x),
                         exception : exceptions::RendererException {
                             base    : exceptions::RendererExceptionBase::NoException,
                             message : "".to_string(),
@@ -114,7 +115,7 @@ impl Node {
                 logger::error("Invalid Variable Name");
                 return EvaluationResult {
                     success   : false,
-                    value     : 0.0,
+                    value     : data::MultipleValues::new_empty(),
                     exception : exceptions::RendererException {
                         base    : exceptions::RendererExceptionBase::InvalidVariableException,
                         message : format!("Invalid variable `{}` was found.", name),
@@ -126,7 +127,7 @@ impl Node {
             // Return number value.
             NodeBase::Number            {value}       => EvaluationResult {
                 success   : true,
-                value     : *value,
+                value     : data::MultipleValues::new_single(*value),
                 exception : exceptions::RendererException {
                     base    : exceptions::RendererExceptionBase::NoException,
                     message : "".to_string(),
@@ -219,10 +220,10 @@ impl Node {
                 if ! right_res.success {
                     return right_res;
                 }
-                if right_res.value == 0.0 {
+                if right_res.value.values.contains(&0.0) {
                     return EvaluationResult {
                         success   : false,
-                        value     : 0.0,
+                        value     : data::MultipleValues::new_empty(),
                         exception : exceptions::RendererException {
                             base    : exceptions::RendererExceptionBase::DivisionByZeroException,
                             message : "".to_string(),
@@ -336,7 +337,7 @@ impl Node {
             // Unknown node found.
             _ => return EvaluationResult {
                 success   : false,
-                value     : 0.0,
+                value     : data::MultipleValues::new_empty(),
                 exception : exceptions::RendererException {
                     base    : exceptions::RendererExceptionBase::InternalException,
                     message : format!("Unknown node `{}` found.", self).to_string(),
@@ -365,10 +366,11 @@ impl fmt::Display for Node {
             NodeBase::HeaderFuncFrame         {x, y, w, h}  => write!(f, "#frame({}, {}, {}, {})", x, y, w, h),
             NodeBase::HeaderFuncResolution    {w, h}        => write!(f, "#resolution({}, {})", w, h),
             NodeBase::HeaderFuncExport        {filename}    => write!(f, "#export(`{}`)", data::escapify(filename.clone())),
+            NodeBase::HeaderFuncPrintNow                    => write!(f, "#print_now()"),
             NodeBase::FunctionSin             {a}           => write!(f, "sin({})", a),
             NodeBase::FunctionCos             {a}           => write!(f, "cos({})", a),
             NodeBase::FunctionTan             {a}           => write!(f, "tan({})", a),
-            NodeBase::FunctionSqrt             {a}          => write!(f, "sqrt({})", a)
+            NodeBase::FunctionSqrt            {a}           => write!(f, "sqrt({})", a)
         }
     }
 }

@@ -12,6 +12,7 @@ pub struct InterpreterData {
     pub set_frame      : bool,
     pub set_resolution : bool,
     pub set_export     : bool,
+    pub print_now      : bool,
 
     pub position       : data::Vector2,
     pub size           : data::Vector2,
@@ -19,6 +20,7 @@ pub struct InterpreterData {
     pub resolution     : data::Vector2,
 
     pub export         : String,
+
 
     pub equations      : Vec<nodes::Node>
 }
@@ -41,6 +43,7 @@ pub fn interpret(nodes : Vec<nodes::Node>) -> InterpreterResult {
         set_frame      : false,
         set_resolution : false,
         set_export     : false,
+        print_now      : false,
 
         position       : defaults::POSITION,
         size           : defaults::SIZE,
@@ -48,6 +51,7 @@ pub fn interpret(nodes : Vec<nodes::Node>) -> InterpreterResult {
         resolution     : defaults::RESOLUTION,
 
         export         : defaults::EXPORT.to_string(),
+
 
         equations      : vec![]
     };
@@ -58,6 +62,7 @@ pub fn interpret(nodes : Vec<nodes::Node>) -> InterpreterResult {
             nodes::NodeBase::HeaderFuncFrame      {x, y, w, h}  => interpret_headerfunc_frame(data.clone(), node.range, x, y, w, h),
             nodes::NodeBase::HeaderFuncResolution {w, h}        => interpret_headerfunc_resolution(data.clone(), node.range, w, h),
             nodes::NodeBase::HeaderFuncExport     {filename}    => interpret_headerfunc_export(data.clone(), node.range, filename),
+            nodes::NodeBase::HeaderFuncPrintNow                 => interpret_headerfunc_print_now(data.clone(), node.range),
             nodes::NodeBase::EqualsExpression     {left, right} => interpret_equation_equals(data.clone(), node.range, *left, *right),
             _                                                   => {
                 println!("{}", node);
@@ -179,6 +184,31 @@ pub fn interpret_headerfunc_export(mut data : InterpreterData, range : data::Ran
 
     data.set_export = true;
     data.export = filename;
+
+    return InterpreterResult {
+        success    : true,
+        data       : data,
+        exceptions : vec![]
+    };
+}
+
+
+
+// Print now header function interpreter
+pub fn interpret_headerfunc_print_now(mut data : InterpreterData, range : data::Range) -> InterpreterResult {
+    if data.print_now {
+        return InterpreterResult {
+            success    : false,
+            data       : data,
+            exceptions : vec![exceptions::InterpreterException {
+                base    : exceptions::InterpreterExceptionBase::HeaderAlreadyAccessedException,
+                message : "Header `print_now` has already been accessed.".to_string(),
+                range   : range
+            }]
+        };
+    }
+
+    data.print_now = true;
 
     return InterpreterResult {
         success    : true,

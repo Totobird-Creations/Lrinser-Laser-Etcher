@@ -53,6 +53,7 @@ impl fmt::Display for ParserException {
         base_as_string = match &self.base {
             ParserExceptionBase::IllegalTokenException => "IllegalTokenException",
             ParserExceptionBase::MissingTokenException => "MissingTokenException",
+            ParserExceptionBase::InternalException     => "InternalException",
             ParserExceptionBase::NoException           => "NoException"
         }.to_string();
 
@@ -68,7 +69,8 @@ pub enum ParserExceptionBase {
     NoException,
 
     IllegalTokenException,
-    MissingTokenException
+    MissingTokenException,
+    InternalException
 }
 
 
