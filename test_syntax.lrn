@@ -1,15 +1,5 @@
-#frame(-16, -16, 32, 32)
-#resolution(128, 128)
+#frame(-32, -32, 64, 64)
+#resolution(256, 256)
 #export("target.png")
 
-y = sqrt( 1 - xx )
-y = sqrt( 4 - xx )
-y = sqrt( 9 - xx )
-y = sqrt( 16 - xx )
-y = sqrt( 25 - xx )
-y = sqrt( 36 - xx )
-y = sqrt( 49 - xx )
-y = sqrt( 64 - xx )
-y = sqrt( 81 - xx )
-y = sqrt( 100 - xx )
-y = sqrt( 116 - xx )
+y = root( 3, x ) * 10

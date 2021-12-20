@@ -56,7 +56,8 @@ pub fn render(mut data : interpreter::InterpreterData) -> RendererResult {
         }
     }
     // Draw equation values to image.
-    for (pixel_x, pixel_y, pixel) in buffer.enumerate_pixels_mut() {
+    for (pixel_x, pixel_y_reversed, pixel) in buffer.enumerate_pixels_mut() {
+        let pixel_y = data.resolution.y - (pixel_y_reversed as i32);
         let y1 = data.position.y as f32 + (data.size.y as f32 * (pixel_y as f32 / data.resolution.y as f32));
         let y2 = data.position.y as f32 + (data.size.y as f32 * ((pixel_y as f32 + 1.0) / data.resolution.y as f32));
 

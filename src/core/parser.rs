@@ -358,7 +358,8 @@ impl Parser {
             "sin"  => self.function_sin(),
             "cos"  => self.function_cos(),
             "tan"  => self.function_tan(),
-            "sqrt" => self.function_sqrt(),
+            "pow"  => self.function_pow(),
+            "root" => self.function_root(),
 
             _       => return self.failure(exceptions::ParserException {
                 base    : exceptions::ParserExceptionBase::InternalException,
@@ -459,20 +460,74 @@ impl Parser {
 
 
 
-    // Sqrt function found.
-    fn function_sqrt(&mut self) -> ParserResult {
+    // Pow function found.
+    fn function_pow(&mut self) -> ParserResult {
         let range = self.token.range.clone();
 
-        // Get 1 expression argument.
-        let res = self.term();
+        // Get 2 expression arguments.
+        let mut res = self.term();
         if ! res.success {
             return res;
         }
-        let term = res.nodes[0].clone();
+        let base = res.nodes[0].clone();
+        if self.token.name != tokens::TK_COMMA {
+            return self.failure(exceptions::ParserException {
+                base    : exceptions::ParserExceptionBase::MissingTokenException,
+                message : "Expected (Comma) not found.".to_string(),
+                range   : self.token.range.clone()
+            })
+        }
+        self.advance();
+        res = self.term();
+        if ! res.success {
+            return res;
+        }
+        let exp = res.nodes[0].clone();
 
         return self.success(vec![nodes::Node {
-            base : nodes::NodeBase::FunctionSqrt {
-                a : Box::new(term)
+            base : nodes::NodeBase::FunctionPow {
+                    base : Box::new(base),
+                    exp  : Box::new(exp)
+            },
+            range : data::Range {
+                filename : range.filename,
+                start    : range.start,
+                end      : self.token.range.end
+            }
+        }]);
+    }
+
+
+
+    // Root function found.
+    fn function_root(&mut self) -> ParserResult {
+        let range = self.token.range.clone();
+
+        // Get 2 expression arguments.
+        let mut res = self.term();
+        if ! res.success {
+            return res;
+        }
+        let exp = res.nodes[0].clone();
+        if self.token.name != tokens::TK_COMMA {
+            return self.failure(exceptions::ParserException {
+                base    : exceptions::ParserExceptionBase::MissingTokenException,
+                message : "Expected (Comma) not found.".to_string(),
+                range   : self.token.range.clone()
+            })
+        }
+        self.advance();
+        res = self.term();
+        if ! res.success {
+            return res;
+        }
+        let base = res.nodes[0].clone();
+
+        return self.success(vec![nodes::Node {
+            base : nodes::NodeBase::FunctionRoot {
+                exp        : Box::new(exp),
+                base       : Box::new(base),
+                user_typed : true
             },
             range : data::Range {
                 filename : range.filename,

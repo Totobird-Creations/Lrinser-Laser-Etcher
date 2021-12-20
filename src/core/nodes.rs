@@ -87,8 +87,14 @@ pub enum NodeBase {
     FunctionTan {
         a : Box<Node>
     },
-    FunctionSqrt {
-        a : Box<Node>
+    FunctionRoot {
+        exp        : Box<Node>,
+        base       : Box<Node>,
+        user_typed : bool
+    },
+    FunctionPow {
+        base : Box<Node>,
+        exp  : Box<Node>
     }
 
 
@@ -313,22 +319,51 @@ impl Node {
                 }
             },
 
-            // Evaluate argument and return sqrt value.
-            NodeBase::FunctionSqrt {a} => {
-                let res = a.evaluate(x);
-                if ! res.success {
-                    return res;
+            // Evaluate arguments and return nth root value.
+            NodeBase::FunctionRoot {exp, base, user_typed} => {
+                let exp_res = exp.evaluate(x);
+                if ! exp_res.success {
+                    return exp_res;
+                }
+                let base_res = base.evaluate(x);
+                if ! base_res.success {
+                    return base_res;
                 }
                 return EvaluationResult {
                     success   : true,
-                    value     : res.value.sqrt(),
+                    value     : base_res.value.root(exp_res.value, *user_typed),
                     exception : exceptions::RendererException {
                         base    : exceptions::RendererExceptionBase::NoException,
                         message : "".to_string(),
                         range   : data::Range {
-                            start    : res.exception.range.start,
-                            end      : res.exception.range.end,
-                            filename : res.exception.range.filename
+                            start    : exp_res.exception.range.start,
+                            end      : base_res.exception.range.end,
+                            filename : exp_res.exception.range.filename
+                        }
+                    }
+                }
+            }
+
+            // Evaluate arguments and return powed value.
+            NodeBase::FunctionPow {base, exp} => {
+                let base_res = base.evaluate(x);
+                if ! base_res.success {
+                    return base_res;
+                }
+                let exp_res = exp.evaluate(x);
+                if ! exp_res.success {
+                    return exp_res;
+                }
+                return EvaluationResult {
+                    success   : true,
+                    value     : base_res.value.pow(exp_res.value),
+                    exception : exceptions::RendererException {
+                        base    : exceptions::RendererExceptionBase::NoException,
+                        message : "".to_string(),
+                        range   : data::Range {
+                            start    : base_res.exception.range.start,
+                            end      : exp_res.exception.range.end,
+                            filename : base_res.exception.range.filename
                         }
                     }
                 }
@@ -356,21 +391,28 @@ impl Node {
 impl fmt::Display for Node {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match &self.base {
-            NodeBase::EqualsExpression        {left, right} => write!(f, "({} = {})", left, right),
-            NodeBase::Number                  {value}       => write!(f, "{}", value),
-            NodeBase::Variable                {name}        => write!(f, "{}", name),
-            NodeBase::AdditionOperation       {left, right} => write!(f, "({} + {})", left, right),
-            NodeBase::SubtractionOperation    {left, right} => write!(f, "({} - {})", left, right),
-            NodeBase::MultiplicationOperation {left, right} => write!(f, "({} * {})", left, right),
-            NodeBase::DivisionOperation       {left, right} => write!(f, "({} / {})", left, right),
-            NodeBase::HeaderFuncFrame         {x, y, w, h}  => write!(f, "#frame({}, {}, {}, {})", x, y, w, h),
-            NodeBase::HeaderFuncResolution    {w, h}        => write!(f, "#resolution({}, {})", w, h),
-            NodeBase::HeaderFuncExport        {filename}    => write!(f, "#export(`{}`)", data::escapify(filename.clone())),
-            NodeBase::HeaderFuncPrintNow                    => write!(f, "#print_now()"),
-            NodeBase::FunctionSin             {a}           => write!(f, "sin({})", a),
-            NodeBase::FunctionCos             {a}           => write!(f, "cos({})", a),
-            NodeBase::FunctionTan             {a}           => write!(f, "tan({})", a),
-            NodeBase::FunctionSqrt            {a}           => write!(f, "sqrt({})", a)
+            NodeBase::EqualsExpression        {left, right}           => write!(f, "({} = {})", left, right),
+            NodeBase::Number                  {value}                 => write!(f, "{}", value),
+            NodeBase::Variable                {name}                  => write!(f, "{}", name),
+            NodeBase::AdditionOperation       {left, right}           => write!(f, "({} + {})", left, right),
+            NodeBase::SubtractionOperation    {left, right}           => write!(f, "({} - {})", left, right),
+            NodeBase::MultiplicationOperation {left, right}           => write!(f, "({} * {})", left, right),
+            NodeBase::DivisionOperation       {left, right}           => write!(f, "({} / {})", left, right),
+            NodeBase::HeaderFuncFrame         {x, y, w, h}            => write!(f, "#frame({}, {}, {}, {})", x, y, w, h),
+            NodeBase::HeaderFuncResolution    {w, h}                  => write!(f, "#resolution({}, {})", w, h),
+            NodeBase::HeaderFuncExport        {filename}              => write!(f, "#export(`{}`)", data::escapify(filename.clone())),
+            NodeBase::HeaderFuncPrintNow                              => write!(f, "#print_now()"),
+            NodeBase::FunctionSin             {a}                     => write!(f, "sin({})", a),
+            NodeBase::FunctionCos             {a}                     => write!(f, "cos({})", a),
+            NodeBase::FunctionTan             {a}                     => write!(f, "tan({})", a),
+            NodeBase::FunctionPow             {base, exp}             => write!(f, "pow({}, {})", base, exp),
+            NodeBase::FunctionRoot            {exp, base, user_typed} => {
+                if *user_typed {
+                    write!(f, "(± ( {}root({})))", exp, base)
+                } else {
+                    write!(f, "({}root({}))", exp, base)
+                }
+            }
         }
     }
 }

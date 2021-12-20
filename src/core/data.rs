@@ -14,12 +14,15 @@ pub const HEADFUNCS  : [&'static str; 4] = [
     "print_now"
 ];
 // Functions that can be used in expressions.
-pub const FUNCTIONS  : [&'static str; 4] = [
+pub const FUNCTIONS  : [&'static str; 5] = [
     "sin",
     "cos",
     "tan",
-    "sqrt"
+    "root",
+    "pow"
 ];
+
+pub const ROOT_MAX_RECURSION : i32 = 25;
 
 
 
@@ -100,11 +103,54 @@ impl MultipleValues {
         }
     }
 
-    pub fn sqrt(self) -> MultipleValues {
+    pub fn pow(self, exp : MultipleValues) -> MultipleValues {
         let mut res = vec![];
         for x in self.values {
-            res.push(x.sqrt());
-            res.push(-x.sqrt());
+            for y in exp.values.clone() {
+                res.push(x.powf(y));
+            }
+        }
+        return MultipleValues {
+            values : res
+        }
+    }
+
+    fn num_root(self, exp : f32, main : f32) -> f32 {
+        let p      = 1e-9_f32;
+        let mut x0 = main / exp;
+        for _i in 0..ROOT_MAX_RECURSION {
+            let x1 = ((exp - 1.0) * x0 + main / f32::powf(x0, exp - 1.0)) / exp;
+            if (x1 - x0).abs() < (x0 * p).abs() {
+                x0 = x1;
+                break;
+            }
+            x0 = x1;
+        }
+        return x0;
+    }
+
+    pub fn root(self, exp : MultipleValues, user_typed : bool) -> MultipleValues {
+        let mut res = vec![];
+        for x in self.values.clone() {
+            for y in exp.values.clone() {
+                if y % 2.0 != 0.0 || x >= 0.0 {
+                    let v = self.clone().num_root(y, x);
+                    res.push(v);
+                    if ! user_typed {
+                        res.push(-v);
+                    }
+                }
+            }
+        }
+        return MultipleValues {
+            values : res
+        }
+    }
+
+    pub fn abs(self) -> MultipleValues {
+        let mut res = vec![];
+        for x in self.values {
+            res.push(x.abs());
         }
         return MultipleValues {
             values : res
@@ -161,6 +207,18 @@ impl ops::Div for MultipleValues {
             for y in other.values.clone() {
                 res.push(x / y);
             }
+        }
+        return MultipleValues {
+            values : res
+        };
+    }
+}
+impl ops::Neg for MultipleValues {
+    type Output = Self;
+    fn neg(self) -> Self {
+        let mut res = vec![];
+        for x in self.values {
+            res.push(-x);
         }
         return MultipleValues {
             values : res
