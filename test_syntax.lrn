@@ -2,4 +2,4 @@
 #resolution(256, 256)
 #export("target.png")
 
-y = root( 3, x ) * 10
+y = 10 * root( 3, x )

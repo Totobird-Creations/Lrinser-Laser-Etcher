@@ -408,9 +408,9 @@ impl fmt::Display for Node {
             NodeBase::FunctionPow             {base, exp}             => write!(f, "pow({}, {})", base, exp),
             NodeBase::FunctionRoot            {exp, base, user_typed} => {
                 if *user_typed {
-                    write!(f, "(± ( {}root({})))", exp, base)
-                } else {
                     write!(f, "({}root({}))", exp, base)
+                } else {
+                    write!(f, "(± ( {}root({})))", exp, base)
                 }
             }
         }

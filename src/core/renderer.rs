@@ -71,13 +71,19 @@ pub fn render(mut data : interpreter::InterpreterData) -> RendererResult {
         for index in 0..data.equations.len() {
             let r1       = values[pixel_x as usize][index].min.clone();
             let r2       = values[pixel_x as usize][index].max.clone();
-            for i in 0..r1.values.len() {
-                let r1v = r1.values[i];
-                let r2v = r2.values[i];
-                if (r1v > y1 && r2v < y2) || (r2v > y1 && r1v < y2) {
-                    colour.g = 0.0;
-                    colour.b = 0.0;
-                    done = true;
+            for r1i in 0..r1.values.len() {
+                let r1v = r1.values[r1i];
+                for r2i in 0..r2.values.len() {
+                    let r2v = r2.values[r2i];
+                    if (r1v > y1 && r2v < y2) || (r2v > y1 && r1v < y2) {
+                        colour.r = 0.0;
+                        colour.g = 0.0;
+                        colour.b = 0.0;
+                        done = true;
+                    }
+                    if done {
+                        break;
+                    }
                 }
                 if done {
                     break;
