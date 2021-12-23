@@ -5,7 +5,6 @@ use super::logger;
 use super::data;
 use super::lexer;
 use super::parser;
-use super::simplifier;
 use super::interpreter;
 use super::renderer;
 use super::printer;
@@ -38,13 +37,9 @@ pub fn run(filename: &str) {
         exit(1);
     }
 
-    // Simplify node list.
-    logger::warning(format!("Simplifier incomplete. Skipping."));
-    let simplifier_res = simplifier::simplify(parser_res.nodes);
-
     // Interpret node list.
     logger::debug(format!("Interpreting node tree."));
-    let interpreter_res = interpreter::interpret(simplifier_res);
+    let interpreter_res = interpreter::interpret(parser_res.nodes);
     if !interpreter_res.success {
         logger::critical("Interpreting failed. Error provided:");
         for exception in interpreter_res.exceptions {

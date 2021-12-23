@@ -19,7 +19,7 @@
             - [ ] Move all non `y` variables from the left side of the equation to the right.
              
              
-    - [ ] Interpreter
+    - [x] Interpreter
          
         - [x] Take headers and generate image frame.
              
@@ -42,7 +42,9 @@
 
 - Bugs:
 
-    - Circular, Conic, etc shapes have holes in them when the line is almost vertical.
+    - Circular, Conic, etc shapes have holes in them when the line doubles back.
+
+    - Root functions leave holes when the line is almost vertical.
 
 
 
@@ -53,10 +55,6 @@
     - Send to laser cutter.
 
     - Unary operations.
-
-    - Power.
-
-    - Sqrt returns multiple values.
 
 
 

@@ -1,4 +1,3 @@
-use super::logger;
 use super::data;
 use super::defaults;
 use super::nodes;
@@ -220,22 +219,16 @@ pub fn interpret_headerfunc_print_now(mut data : InterpreterData, range : data::
 
 
 // Equality equation interpreter
-pub fn interpret_equation_equals(mut data : InterpreterData, _range : data::Range, left : nodes::Node, right : nodes::Node) -> InterpreterResult {
-    match left.base.clone() {
-        nodes::NodeBase::Variable {name} => {
-            if name == "y".to_string() {
-                data.equations.push(right);
-                return InterpreterResult {
-                    success    : true,
-                    data       : data,
-                    exceptions : vec![]
-                };
-            }
-            false
-        },
-        _ => false
-    };
-    logger::error(format!("Invalid left side of expression: `{}`. Ignoring.", left));
+pub fn interpret_equation_equals(mut data : InterpreterData, range : data::Range, left : nodes::Node, right : nodes::Node) -> InterpreterResult {
+    data.equations.push(
+        nodes::Node {
+            base  : nodes::NodeBase::EqualsExpression {
+                left  : Box::new(left),
+                right : Box::new(right)
+            },
+            range : range
+        }
+    );
     return InterpreterResult {
         success    : true,
         data       : data,

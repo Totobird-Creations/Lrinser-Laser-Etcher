@@ -14,7 +14,7 @@ pub mod lexer;
 pub mod nodes;
 pub mod parser;
 
-pub mod simplifier;
+//pub mod simplifier;
 
 pub mod interpreter;
 pub mod renderer;

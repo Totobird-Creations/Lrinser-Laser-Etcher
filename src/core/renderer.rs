@@ -25,38 +25,42 @@ pub fn render(mut data : interpreter::InterpreterData) -> RendererResult {
     }
 
     // Create image
-    let mut buffer = image::ImageBuffer::new(data.resolution.x as u32, data.resolution.y as u32);
+    //let mut buffer = image::ImageBuffer::new(data.resolution.x as u32, data.resolution.y as u32);
     // Get values for each equation at each x pixel.
-    let mut values = vec![];
+    let mut values : Vec<Vec<data::MinMax>> = vec![];
     for pixel_x in 0..data.resolution.x {
         values.push(vec![]);
         let x1 = data.position.x as f32 + (data.size.x as f32 * (pixel_x as f32 / data.resolution.x as f32));
         let x2 = data.position.x as f32 + (data.size.x as f32 * ((pixel_x as f32 + 1.0) / data.resolution.x as f32));
         for index in 0..data.equations.len() {
             let equation = &data.equations[index];
-            let r1       = equation.evaluate(x1);
-            let r2       = equation.evaluate(x2);
-            if ! r1.success {
+            let eq1       = equation.simplify(x1);
+            let eq2       = equation.simplify(x2);
+            if ! eq1.success {
                 return RendererResult {
                     success         : false,
                     export_filename : "".to_string(),
-                    exception       : r1.exception
+                    exception       : eq1.exception
                 };
-            } else if ! r2.success {
+            } else if ! eq2.success {
                 return RendererResult {
                     success         : false,
                     export_filename : "".to_string(),
-                    exception       : r2.exception
+                    exception       : eq2.exception
                 };
             }
+            println!("{}", eq1.value);
+            println!("{}", eq2.value);
+            panic!("sus");
+            /*
             values[pixel_x as usize].push(data::MinMax {
                 min : r1.value,
                 max : r2.value
-            });
+            });*/
         }
     }
     // Draw equation values to image.
-    for (pixel_x, pixel_y_reversed, pixel) in buffer.enumerate_pixels_mut() {
+    /*for (pixel_x, pixel_y_reversed, pixel) in buffer.enumerate_pixels_mut() {
         let pixel_y = data.resolution.y - (pixel_y_reversed as i32);
         let y1 = data.position.y as f32 + (data.size.y as f32 * (pixel_y as f32 / data.resolution.y as f32));
         let y2 = data.position.y as f32 + (data.size.y as f32 * ((pixel_y as f32 + 1.0) / data.resolution.y as f32));
@@ -75,7 +79,7 @@ pub fn render(mut data : interpreter::InterpreterData) -> RendererResult {
                 let r1v = r1.values[r1i];
                 for r2i in 0..r2.values.len() {
                     let r2v = r2.values[r2i];
-                    if (r1v > y1 && r2v < y2) || (r2v > y1 && r1v < y2) {
+                    if (r1v > y1 && r2v <= y2) || (r2v > y1 && r1v <= y2) {
                         colour.r = 0.0;
                         colour.g = 0.0;
                         colour.b = 0.0;
@@ -97,7 +101,7 @@ pub fn render(mut data : interpreter::InterpreterData) -> RendererResult {
     }
 
     // Write image.
-    buffer.save(data.export.clone());
+    buffer.save(data.export.clone());*/
 
     // Return success.
     return RendererResult {

@@ -62,11 +62,6 @@ pub struct MultipleValues {
     pub values : Vec<f32>
 }
 impl MultipleValues {
-    pub fn new_empty() -> MultipleValues {
-        return MultipleValues {
-            values : vec![]
-        };
-    }
     pub fn new_single(value : f32) -> MultipleValues {
         return MultipleValues {
             values : vec![value]
