@@ -2,4 +2,5 @@
 #resolution(256, 256)
 #export("target.png")
 
-2y = x
+2y + 5 = 10 + 7
+2y + 5 = 17

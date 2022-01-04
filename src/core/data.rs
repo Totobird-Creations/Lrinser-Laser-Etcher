@@ -222,11 +222,12 @@ impl ops::Neg for MultipleValues {
 }
 
 
-// Renderer pixel min-max value.
+
+// Renderer pixel left-right values.
 #[derive(Clone, Debug)]
-pub struct MinMax {
-    pub min : MultipleValues,
-    pub max : MultipleValues
+pub struct LeftRight {
+    pub left  : MultipleValues,
+    pub right : MultipleValues
 }
 
 

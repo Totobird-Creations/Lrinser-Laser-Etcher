@@ -1,7 +1,9 @@
 use image;
+use super::logger;
 use super::exceptions;
 use super::interpreter;
 use super::data;
+use super::nodes;
 
 
 
@@ -24,10 +26,12 @@ pub fn render(mut data : interpreter::InterpreterData) -> RendererResult {
         data.resolution.y = data.size.y
     }
 
-    // Create image
-    //let mut buffer = image::ImageBuffer::new(data.resolution.x as u32, data.resolution.y as u32);
+    // Create image buffer.
+    let mut buffer = image::ImageBuffer::new(data.resolution.x as u32, data.resolution.y as u32);
+
     // Get values for each equation at each x pixel.
-    let mut values : Vec<Vec<data::MinMax>> = vec![];
+    // This is a Vec (each column) containing a Vec (each valid equation set) containing a LeftRight (left and right side values of the column)
+    let mut values : Vec<Vec<data::LeftRight>> = vec![]; 
     for pixel_x in 0..data.resolution.x {
         values.push(vec![]);
         let x1 = data.position.x as f32 + (data.size.x as f32 * (pixel_x as f32 / data.resolution.x as f32));
@@ -49,18 +53,31 @@ pub fn render(mut data : interpreter::InterpreterData) -> RendererResult {
                     exception       : eq2.exception
                 };
             }
-            println!("{}", eq1.value);
-            println!("{}", eq2.value);
-            panic!("sus");
-            /*
-            values[pixel_x as usize].push(data::MinMax {
-                min : r1.value,
-                max : r2.value
-            });*/
+            match eq1.value.base.clone() {
+                nodes::NodeBase::MultipleNumber {value : value1} => {
+                    match eq2.value.base.clone() {
+                        nodes::NodeBase::MultipleNumber {value : value2} => {
+                            let values_index = values.len() - 1;
+                            values[values_index].push(data::LeftRight {
+                                left  : value1,
+                                right : value2
+                            });
+                            continue;
+                        },
+                        _                                                 => {
+                            logger::error(format!("Failed to simplify: {}", eq2.value));
+                        }
+                    }
+                }
+                _                                        => {
+                    logger::error(format!("Failed to simplify: {}", eq1.value));
+                }
+            }
         }
     }
+
     // Draw equation values to image.
-    /*for (pixel_x, pixel_y_reversed, pixel) in buffer.enumerate_pixels_mut() {
+    for (pixel_x, pixel_y_reversed, pixel) in buffer.enumerate_pixels_mut() {
         let pixel_y = data.resolution.y - (pixel_y_reversed as i32);
         let y1 = data.position.y as f32 + (data.size.y as f32 * (pixel_y as f32 / data.resolution.y as f32));
         let y2 = data.position.y as f32 + (data.size.y as f32 * ((pixel_y as f32 + 1.0) / data.resolution.y as f32));
@@ -72,36 +89,33 @@ pub fn render(mut data : interpreter::InterpreterData) -> RendererResult {
             a : 1.0
         };
         let mut done = false;
-        for index in 0..data.equations.len() {
-            let r1       = values[pixel_x as usize][index].min.clone();
-            let r2       = values[pixel_x as usize][index].max.clone();
-            for r1i in 0..r1.values.len() {
-                let r1v = r1.values[r1i];
-                for r2i in 0..r2.values.len() {
-                    let r2v = r2.values[r2i];
-                    if (r1v > y1 && r2v <= y2) || (r2v > y1 && r1v <= y2) {
+        for leftright in values[pixel_x as usize].clone() {
+            for left in leftright.left.values.clone() {
+                for right in leftright.right.values.clone() {
+                    if (y1 >= left && y2 <= right) || (y1 <= left && y2 >= right) {
                         colour.r = 0.0;
                         colour.g = 0.0;
                         colour.b = 0.0;
                         done = true;
-                    }
-                    if done {
                         break;
                     }
                 }
-                if done {
-                    break;
-                }
+                if done {break}
             }
-            if done {
-                break;
-            }
+            if done {break}
         }
+
         *pixel = image::Rgba([(colour.r * 255.0) as u8, (colour.g * 255.0) as u8, (colour.b * 255.0) as u8, (colour.a * 255.0) as u8]);
     }
 
     // Write image.
-    buffer.save(data.export.clone());*/
+    match buffer.save(data.export.clone()) {
+        Ok(_v)  => (),
+        Err(_e) => {
+            logger::critical("Image write failed.");
+            panic!();
+        }
+    };
 
     // Return success.
     return RendererResult {

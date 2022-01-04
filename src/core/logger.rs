@@ -56,8 +56,8 @@ pub fn info<S: AsRef<str>>(text : S) {
     let now = Local::now();
     println!("{} {} {}{} {} {} {}",
         "[".dimmed().white(), now.format("%T.%f").to_string().as_str().bright_blue(), "]".dimmed().white(),
-        "[".dimmed().white(), "INFO    ".white().bold(), "]".dimmed().white(),
-        text_ref.white().bold()
+        "[".dimmed().white(), "INFO    ".bright_white().bold(), "]".dimmed().white(),
+        text_ref.bright_white().bold()
     );
 }
 
@@ -68,19 +68,19 @@ pub fn debug<S: AsRef<str>>(text : S) {
     let now = Local::now();
     println!("{} {} {}{} {} {} {}",
         "[".dimmed().white(), now.format("%T.%f").to_string().as_str().bright_blue(), "]".dimmed().white(),
-        "[".dimmed().white(), "DEBUG   ".bright_black(), "]".dimmed().white(),
-        text_ref.bright_black()
+        "[".dimmed().white(), "DEBUG   ".white().dimmed(), "]".dimmed().white(),
+        text_ref.white().dimmed()
     );
 }
 
 
 
-pub fn trace<S: AsRef<str>>(text : S) {
+/*pub fn trace<S: AsRef<str>>(text : S) {
     let text_ref = text.as_ref();
     let now = Local::now();
     println!("{} {} {}{} {} {} {}",
         "[".dimmed().white(), now.format("%T.%f").to_string().as_str().bright_blue(), "]".dimmed().white(),
-        "[".dimmed().white(), "TRACE   ".bright_black().dimmed(), "]".dimmed().white(),
-        text_ref.bright_black().dimmed()
+        "[".dimmed().white(), "TRACE   ".bright_black(), "]".dimmed().white(),
+        text_ref.bright_black()
     );
-}
+}*/

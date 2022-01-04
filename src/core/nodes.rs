@@ -121,6 +121,32 @@ impl Node {
                 if ! right_res.success {
                     return right_res;
                 }
+                match left_res.value.base.clone() {
+                    NodeBase::Variable {name} => {
+                        if name == "y" {
+                            match right_res.value.base.clone() {
+                                NodeBase::MultipleNumber {value : _value} => {
+                                    return right_res;
+                                },
+                                _                         => ()
+                            }
+                        }
+                    },
+                    _                         => ()
+                }
+                match right_res.value.base.clone() {
+                    NodeBase::Variable {name} => {
+                        if name == "y" {
+                            match left_res.value.base.clone() {
+                                NodeBase::MultipleNumber {value : _value} => {
+                                    return left_res;
+                                },
+                                _                         => ()
+                            }
+                        }
+                    },
+                    _                         => ()
+                }
                 return EvaluationResult {
                     success   : true,
                     value     : Node {
@@ -426,31 +452,35 @@ impl Node {
                 return ret;
             },
 
-            /*
             // Evaluate argument and return sin value.
             NodeBase::FunctionSin {a} => {
-                let res = a.evaluate(x);
+                let res = a.simplify(x);
                 if ! res.success {
                     return res;
                 }
-                return EvaluationResult {
-                    success   : true,
-                    value     : res.value.sin(),
-                    exception : exceptions::RendererException {
-                        base    : exceptions::RendererExceptionBase::NoException,
-                        message : "".to_string(),
-                        range   : data::Range {
-                            start    : res.exception.range.start,
-                            end      : res.exception.range.end,
-                            filename : res.exception.range.filename
+                match res.value.base {
+                    NodeBase::MultipleNumber {value} => {
+                        return EvaluationResult {
+                            success   : true,
+                            value     : res.value.sin(),
+                            exception : exceptions::RendererException {
+                                base    : exceptions::RendererExceptionBase::NoException,
+                                message : "".to_string(),
+                                range   : data::Range {
+                                    start    : res.exception.range.start,
+                                    end      : res.exception.range.end,
+                                    filename : res.exception.range.filename
+                                }
+                            }
                         }
                     }
                 }
+                
             },
 
             // Evaluate argument and return cos value.
             NodeBase::FunctionCos {a} => {
-                let res = a.evaluate(x);
+                let res = a.simplify(x);
                 if ! res.success {
                     return res;
                 }
@@ -471,7 +501,7 @@ impl Node {
 
             // Evaluate argument and return tan value.
             NodeBase::FunctionTan {a} => {
-                let res = a.evaluate(x);
+                let res = a.simplify(x);
                 if ! res.success {
                     return res;
                 }
@@ -492,11 +522,11 @@ impl Node {
 
             // Evaluate arguments and return nth root value.
             NodeBase::FunctionRoot {exp, base, user_typed} => {
-                let exp_res = exp.evaluate(x);
+                let exp_res = exp.simplify(x);
                 if ! exp_res.success {
                     return exp_res;
                 }
-                let base_res = base.evaluate(x);
+                let base_res = base.simplify(x);
                 if ! base_res.success {
                     return base_res;
                 }
@@ -517,11 +547,11 @@ impl Node {
 
             // Evaluate arguments and return powed value.
             NodeBase::FunctionPow {base, exp} => {
-                let base_res = base.evaluate(x);
+                let base_res = base.simplify(x);
                 if ! base_res.success {
                     return base_res;
                 }
-                let exp_res = exp.evaluate(x);
+                let exp_res = exp.simplify(x);
                 if ! exp_res.success {
                     return exp_res;
                 }
@@ -539,7 +569,6 @@ impl Node {
                     }
                 }
             }
-            */
 
             // Unknown node found.
             _ => {
@@ -563,6 +592,72 @@ impl Node {
             }
 
         };
+    }
+
+
+
+    fn sin(&self) -> Node {
+        match self.base.clone() {
+            NodeBase::MultipleNumber {value} => {
+                return Node {
+                    base  : NodeBase::MultipleNumber {
+                        value : value.sin()
+                    },
+                    range : self.range
+                }
+            }
+            _ => ()
+        }
+        return self.clone();
+    }
+
+    fn cos(&self) -> Node {
+        match self.base.clone() {
+            NodeBase::MultipleNumber {value} => {
+                return Node {
+                    base  : NodeBase::MultipleNumber {
+                        value : value.cos()
+                    },
+                    range : self.range
+                }
+            }
+            _ => ()
+        }
+        return self.clone();
+    }
+
+    fn tan(&self) -> Node {
+        match self.base.clone() {
+            NodeBase::MultipleNumber {value} => {
+                return Node {
+                    base  : NodeBase::MultipleNumber {
+                        value : value.tan()
+                    },
+                    range : self.range
+                }
+            }
+            _ => ()
+        }
+        return self.clone();
+    }
+
+    fn root(&self, exp : Node, user_typed : bool) -> Node {
+        panic!("Root");
+    }
+
+    fn pow(&self, exp : Node) -> Node {
+        match self.base.clone() {
+            NodeBase::MultipleNumber {value} => {
+                return Node {
+                    base  : NodeBase::MultipleNumber {
+                        value : value.pow(exp)
+                    },
+                    range : self.range
+                }
+            }
+            _ => ()
+        }
+        return self.clone();
     }
 }
 // Displays for different types of nodes for debugging.
