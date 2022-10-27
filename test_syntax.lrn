@@ -1,6 +1,5 @@
-#frame(-32, -32, 64, 64)
-#resolution(256, 256)
+#frame(-5, -5, 10, 10)
+#resolution(16384, 16384)
 #export("target.png")
 
-2y + 5 = 10 + 7
-2y + 5 = 17
+y = sin(x) + x

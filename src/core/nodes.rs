@@ -459,7 +459,7 @@ impl Node {
                     return res;
                 }
                 match res.value.base {
-                    NodeBase::MultipleNumber {value} => {
+                    NodeBase::MultipleNumber {value : _} => {
                         return EvaluationResult {
                             success   : true,
                             value     : res.value.sin(),
@@ -472,8 +472,9 @@ impl Node {
                                     filename : res.exception.range.filename
                                 }
                             }
-                        }
-                    }
+                        };
+                    },
+                    _ => {panic!("INTERNAL ERROR | TODO FIX")}
                 }
                 
             },
@@ -603,7 +604,7 @@ impl Node {
                     base  : NodeBase::MultipleNumber {
                         value : value.sin()
                     },
-                    range : self.range
+                    range : self.range.clone()
                 }
             }
             _ => ()
@@ -618,7 +619,7 @@ impl Node {
                     base  : NodeBase::MultipleNumber {
                         value : value.cos()
                     },
-                    range : self.range
+                    range : self.range.clone()
                 }
             }
             _ => ()
@@ -633,7 +634,7 @@ impl Node {
                     base  : NodeBase::MultipleNumber {
                         value : value.tan()
                     },
-                    range : self.range
+                    range : self.range.clone()
                 }
             }
             _ => ()
@@ -647,12 +648,12 @@ impl Node {
 
     fn pow(&self, exp : Node) -> Node {
         match self.base.clone() {
-            NodeBase::MultipleNumber {value} => {
+            NodeBase::MultipleNumber {ref value} => {
                 return Node {
-                    base  : NodeBase::MultipleNumber {
-                        value : value.pow(exp)
+                    base : NodeBase::MultipleNumber {
+                        value : value.clone().pow(value.clone())
                     },
-                    range : self.range
+                    range : self.range.clone()
                 }
             }
             _ => ()
